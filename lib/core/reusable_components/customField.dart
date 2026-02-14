@@ -65,8 +65,8 @@ class _CustomfieldState extends State<Customfield> {
           icon: Icon(
             color: Color(0xFF6C6C6C),
             passwordToggle
-                ?Icons.visibility_off_rounded
-                :Icons.visibility_rounded, /// شكل العين بيتغير حسب حالة الباسورد
+                ?Icons.visibility_rounded
+                :Icons.visibility_off_rounded, /// شكل العين بيتغير حسب حالة الباسورد
           ),
           onPressed: () {
             setState(() {

@@ -1,3 +1,4 @@
+import 'package:attendo/core/appStyle.dart';
 import 'package:attendo/core/constants.dart';
 import 'package:attendo/core/network/api_error.dart';
 import 'package:attendo/core/reusable_components/customButton.dart';
@@ -58,7 +59,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppStyle.lightTheme.scaffoldBackgroundColor,
       appBar: AppBar(
+        backgroundColor: AppStyle.lightTheme.scaffoldBackgroundColor,
         title: Text('Register'),
         centerTitle: true,
       ),
@@ -68,6 +71,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             horizontal: 50,
         ),
         child: SingleChildScrollView(
+
           child: Form(
                 key: formKey,
                 child: Column(

@@ -1,3 +1,4 @@
+import 'package:attendo/core/appStyle.dart';
 import 'package:attendo/core/network/api_error.dart';
 import 'package:attendo/core/reusable_components/customSnackBar.dart';
 import 'package:attendo/features/auth/data/auth_repo.dart';
@@ -55,7 +56,9 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppStyle.lightTheme.scaffoldBackgroundColor,
       appBar: AppBar(
+        backgroundColor: AppStyle.lightTheme.scaffoldBackgroundColor,
         title: Text('Login'),
         centerTitle: true,
       ),

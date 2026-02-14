@@ -2,8 +2,8 @@ import 'package:attendo/core/network/api_error.dart';
 import 'package:dio/dio.dart';
 class ApiExceptions{
   static ApiError handleError(DioException error){
-    final statusCode = error.response?.statusCode;
-    final data = error.response?.data;
+    final statusCode = error.response?.statusCode; /// بيحاول يجيب رقم الخطأ اللي رجع من السيرفر ويحطه في متغير اسمه statusCode وعملنا response انه ممكن يرجع رقم وممكن لا
+    final data = error.response?.data; /// بيجيب البيانات اللي رجعت من السيرفر لما حصل Error
     if(statusCode != null) {
       if (data is Map<String, dynamic> && data ['message'] != null) {
         return ApiError(message: data['message'], statusCode: statusCode);
