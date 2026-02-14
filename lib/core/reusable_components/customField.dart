@@ -33,36 +33,37 @@ class _CustomfieldState extends State<Customfield> {
       cursorHeight: 20,
       decoration: InputDecoration(
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(50),
           borderSide: BorderSide(
-            color: Colors.grey.shade900,
+            color: Color(0xFF6C6C6C),
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(
-            color: Colors.grey.shade900,
+            color: Color(0xFF6C6C6C),
           ),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(
-            color: Colors.grey.shade900,
+            color: Color(0xFF6C6C6C),
           ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(
-            color: Colors.grey.shade900,
+            color: Color(0xFF6C6C6C),
           ),
         ),
         hintText: widget.hint,
         hintStyle: TextStyle(
-          color: Colors.grey.shade900,
+          color: Color(0xFF6C6C6C),
         ),
         prefixIcon: widget.prefixIcon,
         suffixIcon: widget.isObscured ? IconButton( /// ده شرط بيقرر يظهر العين ولا لأ
           icon: Icon(
+            color: Color(0xFF6C6C6C),
             passwordToggle
                 ?Icons.visibility_off_rounded
                 :Icons.visibility_rounded, /// شكل العين بيتغير حسب حالة الباسورد

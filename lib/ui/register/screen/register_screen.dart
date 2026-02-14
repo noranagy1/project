@@ -60,9 +60,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Register'),
+        centerTitle: true,
       ),
       body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20),
+        padding: EdgeInsets.symmetric(
+            vertical: 100,
+            horizontal: 50,
+        ),
         child: SingleChildScrollView(
           child: Form(
                 key: formKey,
@@ -82,7 +86,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       hint: 'Name',
                       prefixIcon: Icon(
                         Icons.person_rounded,
-                        color: Colors.grey.shade900,
+                        color: Color(0xFF6C6C6C),
                       ),
                       controller: nameController,
                       keyboardType: TextInputType.name,
@@ -103,7 +107,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       hint: 'Email',
                       prefixIcon: Icon(
                         Icons.email,
-                        color: Colors.grey.shade900,
+                        color: Color(0xFF6C6C6C),
                       ),
                       controller: emailController,
                       keyboardType: TextInputType.emailAddress,
@@ -123,7 +127,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       hint: 'Password',
                       prefixIcon: Icon(
                         Icons.lock_rounded,
-                        color: Colors.grey.shade900,
+                        color: Color(0xFF6C6C6C),
                       ),
                       controller: passwordController,
                       keyboardType: TextInputType.visiblePassword,
@@ -134,7 +138,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       hint: Text(
                           'Select Role',
                               style: TextStyle(
-                          color: Colors.grey.shade900,
+                          color: Color(0xFF6C6C6C),
                         ),
                       ),
                       items: [
@@ -171,7 +175,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('already have an account?'),
+                        Text(
+                            'already have an account?',
+                          style: TextStyle(
+                            color: Color(0xFF6C6C6C),
+                          ),
+                        ),
                         TextButton(
                           onPressed: () {
                             Navigator.push(context, MaterialPageRoute(

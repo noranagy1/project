@@ -57,9 +57,13 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Login'),
+        centerTitle: true,
       ),
       body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20),
+        padding: EdgeInsets.symmetric(
+            vertical: 100,
+            horizontal: 50,
+        ),
         child: SingleChildScrollView(
           child: Form(
             key: formKey,
@@ -82,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   hint: 'Email',
                   prefixIcon: Icon(
                     Icons.email,
-                    color: Colors.grey.shade900,
+                    color: Color(0xFF6C6C6C),
                   ),
                   controller: emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -102,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   hint: 'Password',
                   prefixIcon: Icon(
                     Icons.lock_rounded,
-                    color: Colors.grey.shade900,
+                    color: Color(0xFF6C6C6C),
                   ),
                   controller: passwordController,
                   keyboardType: TextInputType.visiblePassword,
@@ -115,6 +119,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: () {},
                         child: Text(
                           'Forgot Password?',
+                          style: TextStyle(
+                            color: Color(0xFF6C6C6C),
+                          ),
                         ),
                                       ),
                     ),
@@ -138,7 +145,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Don\'t have an account?'),
+                    Text(
+                        'Don\'t have an account?',
+                      style: TextStyle(
+                        color: Color(0xFF6C6C6C),
+                      ),
+                    ),
                     TextButton(
                       onPressed: () {
                         Navigator.push(context, MaterialPageRoute(

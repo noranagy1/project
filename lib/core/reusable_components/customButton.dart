@@ -12,9 +12,9 @@ class Custombutton extends StatelessWidget {
     return ElevatedButton(
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.symmetric(vertical: 16),
-          backgroundColor: Colors.grey.shade900,
+          backgroundColor: Color(0xFF655AE4),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(60),
           ),
         ),
         onPressed: onPressed,
