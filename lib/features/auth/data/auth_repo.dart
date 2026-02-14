@@ -10,7 +10,7 @@ class AuthRepo{
   Future<UserModel?> login(String email, String password) async {
     try {
       final response = await apiService.post(
-          '/login', {'email': email, 'password': password});
+          '/login', {'email': email, 'password': password}); /// هتأكد منهم من رؤي
       if (response is ApiError) {
         throw response;
       }
@@ -38,7 +38,7 @@ class AuthRepo{
   /// register
   Future<UserModel?> register(String name, String email, String password) async {
     try {
-      final response = await apiService.post( '/register', {'name': name, 'email': email, 'password': password});
+      final response = await apiService.post( '/register', {'name': name, 'email': email, 'password': password}); /// هتأكد منهم من رؤي
       if (response is ApiError) {
         throw response;
       }
@@ -68,7 +68,7 @@ class AuthRepo{
   Future<void> logout() async {
   final response = await apiService.post('/logout', {});
   if (response['data'] != null){
-    throw ApiError(message: 'djjdjjjdjdd');
+    throw ApiError(message: 'UnExpected Error from server. Please try again later');
   }
   await PrefHelper.clearToken();
   }

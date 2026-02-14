@@ -21,7 +21,7 @@ Future <dynamic> get(String endpoint) async {
       return ApiExceptions.handleError(e);
     }
   }
-  /// put // update
+  /// put /// update
   Future <dynamic> put(String endpoint, Map<String, dynamic> body) async {
     try {
       final response = await _dioClient.dio.put(endpoint, data: body);

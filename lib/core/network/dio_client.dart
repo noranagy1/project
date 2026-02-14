@@ -2,22 +2,25 @@ import 'package:attendo/core/utils/pref_helpers.dart';
 import 'package:dio/dio.dart';
 class DioClient{
   final Dio _dio = Dio(
+    /// دا constructor بتاع dio
+    /// دا بيتنفذ اول ما اعمل object من class
+    /// _ دي معناها انه private يعنى بيتسخدم جوه class دي بس
     BaseOptions(
-      baseUrl: 'https://jsonplaceholder.typicode.com',
+      baseUrl: 'https://sonic-zdi0.onrender.com/api',
       headers: {
         'Content-Type': 'application/json',
       }
     )
   );
   DioClient(){
-    dio.interceptors.add(
+    _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
           final token = await PrefHelper.getToken();
-          if(token!.isNotEmpty && token != null) {
+          if(token != null && token.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $token';
           }
-          return handler.next(options);
+          return handler.next(options); /// إرسال الريكوست بعد التعديل الي السيرفر
         },
       )
     );

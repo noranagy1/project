@@ -7,7 +7,7 @@ class PrefHelper{
   }
   static Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_tokenKey);
+    return prefs.getString(_tokenKey); /// بترجع القيمة المخزنة تحت المفتاح ده
   }
   static Future<void> clearToken() async {
     final prefs = await SharedPreferences.getInstance();
