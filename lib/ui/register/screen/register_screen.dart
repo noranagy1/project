@@ -161,6 +161,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                          /// معني validate() انه راح شغل كله ال validators اللى فى form عشان يتأكد ان البيانات صح
                         onPressed: () {
                           if(formKey.currentState!.validate()) {
+                            /// ! null check
                             register();
                           }
                         },
