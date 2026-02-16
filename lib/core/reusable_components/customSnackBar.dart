@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-SnackBar customSnack(errorMsg){
+/// طريقة سريعة لإظهار رسالة للمستخدم بدون تغيير الشاشة أو فتح AlertDialog
+SnackBar customSnack(errorMsg){ /// تاخد رسالة errorMsg وتعمل SnackBar جاهزة بالتصميم اللي حددناه
 return SnackBar(
     padding: EdgeInsets.symmetric(
       horizontal: 20,

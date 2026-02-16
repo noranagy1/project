@@ -3,6 +3,7 @@ import 'package:attendo/core/network/api_error.dart';
 import 'package:attendo/core/reusable_components/customSnackBar.dart';
 import 'package:attendo/features/auth/data/auth_repo.dart';
 import 'package:attendo/ui/register/screen/register_screen.dart';
+import 'package:attendo/ui/views/profileView.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:attendo/core/constants.dart';
@@ -33,14 +34,16 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isLoading = false;
   AuthRepo authRepo = AuthRepo();
   Future<void> login() async {
-    if(!formKey.currentState!.validate()) {
+    if(formKey.currentState!.validate()) {
       setState(() => isLoading = true);
       try {
-        final user = await authRepo.login(emailController.text, passwordController.text);
-        if(user != null) {
-          Navigator.push(context, MaterialPageRoute(
-            builder: (context) => RegisterScreen(),
-          ));
+        final user = await authRepo.login(emailController.text.trim(), passwordController.text.trim()); /// فى طريقه toJson
+        if(user != null) { /// لو user رجع بdata
+          Navigator.pushAndRemoveUntil(context, MaterialPageRoute( /// روح بقى للشاشة اللى انت عايزها
+            builder: (context) => Profileview(),
+          ), (route) => false
+          );
+          ScaffoldMessenger.of(context).showSnackBar(customSnack('login successfully'));
         }
         setState(() => isLoading = false);
       } catch (e) {
@@ -80,7 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       return 'should\'t be empty';
                     }
                     /// بيتأكد إن الإيميل مكتوب بطريقة صحيحة باستخدام Regex
-                    if (!RegExp(emailRegex).hasMatch(value)) {
+                    if (!RegExp(emailRegex).hasMatch(value)) { /// لو القيمة اللي المستخدم كتبها مش بتطابق شكل الإيميل الصح
                       /// ! دي معناها not يعنى لو الايميل غلط قول كده
                       return 'invalid email';
                     }
@@ -129,19 +132,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                     ),
                 Gap(10),
+                /// login button
                 isLoading
                     ? CupertinoActivityIndicator(color: Colors.white)
-                    : Container(
+                    : SizedBox(
                   width: double.infinity,
                   child: Custombutton(
                     text: 'Login',
                     /// لما المستخدم يضغط على زرار التسجيل، التطبيق بيتأكد الأول إن كل البيانات اللي في الفورم صح باستخدام validate
                     /// معني validate() انه راح شغل كله ال validators اللى فى form عشان يتأكد ان البيانات صح
-                    onPressed: () {
-                      if(formKey.currentState!.validate()) {
-                        login();
-                      }
-                    },
+                    onPressed: login,
                   ),
                 ),
                 Gap(10),
@@ -156,7 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     TextButton(
                       onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(
+                        Navigator.pushReplacement(context, MaterialPageRoute(
                           builder: (context) => RegisterScreen(),
                         ));
                       },

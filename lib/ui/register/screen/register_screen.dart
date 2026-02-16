@@ -33,29 +33,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
     emailController.dispose();
     passwordController.dispose();
   }
+  String? selectedRole;
   bool isLoading = false;
   AuthRepo authRepo = AuthRepo();
   Future<void> register() async {
-    if(!formKey.currentState!.validate()) {
-      try {
-        setState(() => isLoading = true);
-        final user = await authRepo.register(nameController.text, emailController.text, passwordController.text);
-        if(user != null) {
-          Navigator.push(context, MaterialPageRoute(
-            builder: (context) => LoginScreen(),
-          ));
+    if (formKey.currentState!.validate()) {
+        try {
+          setState(() => isLoading = true);
+          final user = await authRepo.register(
+              nameController.text.trim(), emailController.text.trim(),
+              passwordController.text.trim(), selectedRole!.trim());
+          if (user != null) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => LoginScreen()),
+                  (route) => false,
+            );
+            ScaffoldMessenger.of(context).showSnackBar(customSnack('Registration success'));
+          }
+          setState(() => isLoading = false);
+        } catch (e) {
+          setState(() => isLoading = false);
+          String errorMsg = 'error in register';
+          if (e is ApiError) {
+            errorMsg = e.message;
+          }
+          ScaffoldMessenger.of(context).showSnackBar(customSnack(errorMsg));
         }
-        setState(() => isLoading = false);
-      }catch(e){
-        setState(() => isLoading = false);
-        String errorMsg = 'error in register';
-        if(e is ApiError) {
-          errorMsg = e.message;
-        }
-        ScaffoldMessenger.of(context).showSnackBar(customSnack(errorMsg));
       }
     }
-  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -138,41 +145,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       isObscured: true,
                     ),
                     Gap(16),
-                    DropdownButtonFormField(
-                      hint: Text(
-                          'Select Role',
-                              style: TextStyle(
-                          color: Color(0xFF6C6C6C),
-                        ),
-                      ),
-                      items: [
-                        DropdownMenuItem(
-                          value: 'Employee',
-                          child: Text(
-                              'Employee'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Security',
-                          child: Text('Security'),
-                        ),
-                      ],
-                      onChanged: (value) {},
+                    DropdownButton(
+                      isExpanded: true,
+                        value: selectedRole,
+                        hint: Text('Select Role'),
+                        items: ['Employee', 'Security'].map((role) {
+                          return DropdownMenuItem(
+                            value: role,
+                            child: Text(role),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                            setState(() {
+                              selectedRole = value!;
+                            });
+                        },
                     ),
                     Gap(16),
+                    /// Registe button
                     isLoading
                         ? CupertinoActivityIndicator()
-                        : Container(
+                        : SizedBox(
                       width: double.infinity,
                       child: Custombutton(
                         text: 'Create Account',
                         /// لما المستخدم يضغط على زرار التسجيل، التطبيق بيتأكد الأول إن كل البيانات اللي في الفورم صح باستخدام validate
                          /// معني validate() انه راح شغل كله ال validators اللى فى form عشان يتأكد ان البيانات صح
-                        onPressed: () {
-                          if(formKey.currentState!.validate()) {
-                            /// ! null check
-                            register();
-                          }
-                        },
+                        onPressed: register,
                       ),
                     ),
                     Gap(10),
@@ -180,14 +179,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                            'already have an account?',
+                            'Already have an account?',
                           style: TextStyle(
                             color: Color(0xFF6C6C6C),
                           ),
                         ),
                         TextButton(
                           onPressed: () {
-                            Navigator.push(context, MaterialPageRoute(
+                            Navigator.pushReplacement(context, MaterialPageRoute(
                               builder: (context) => LoginScreen(),
                             ));
                           },
