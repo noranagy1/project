@@ -1,28 +1,38 @@
+import 'package:attendo/core/color_manager.dart';
 import 'package:flutter/material.dart';
 class Custombutton extends StatelessWidget {
   String text;
+  Color? buttonColor;
   void Function() onPressed; /// علشان أخلي الزرار يستقبل Function من بره، وده بيسمحلي أعيد استخدام نفس الزرار في أماكن مختلفة مع وظائف مختلفة
   Custombutton({
     required this.onPressed,
     super.key,
-    required this.text,
+    required this.text,  this.buttonColor,
   });
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
         style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.symmetric(vertical: 16),
-          backgroundColor: Color(0xFF655AE4),
+          backgroundColor: buttonColor,
+          padding: EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 17,
+          ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(60),
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(
+              width: 1,
+              color: ColorManager.buttonColor,
+          ),
           ),
         ),
         onPressed: onPressed,
         child: Text(
             text,
           style: TextStyle(
-            fontSize: 20,
+            fontSize: 18,
             color: Colors.white,
+            fontWeight: FontWeight.bold,
           ),
         ),
     );

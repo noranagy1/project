@@ -1,12 +1,13 @@
 import 'package:attendo/core/utils/pref_helpers.dart';
 import 'package:dio/dio.dart';
+import 'dart:io';
 class DioClient{
   final Dio _dio = Dio(
     /// دا constructor بتاع dio
     /// دا بيتنفذ اول ما اعمل object من class
     /// _ دي معناها انه private يعنى بيتسخدم جوه class دي بس
     BaseOptions(
-      baseUrl: 'http://192.168.224.35:3000',
+      baseUrl: 'https://smart-system-attendance-production-d4bd.up.railway.app',
       headers: {
         'Content-Type': 'application/json',
         'Language': 'en'

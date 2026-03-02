@@ -11,10 +11,19 @@ class ApiExceptions{
             statusCode: statusCode);
       }
     }
-    // print(statusCode);
-    // print(data);
+    print(statusCode);
+    print(data);
+    print(error.type);
+    print(error.message);
+    print(error.response);
+    if (error is DioException) {
+      print("Type: ${error.type}");
+      print("Message: ${error.message}");
+      print("Error: ${error.error}");
+      print("Response: ${error.response}");
+    }
     if(statusCode == 302) {
-      throw ApiError(message: 'This email is already registered');
+      return ApiError(message: 'This email is already registered');
     }
     switch (error.type) { /// هنا عادي ازود الحالات براحتي على حسب الايرور اللى هيطلعلى
       case DioExceptionType.connectionTimeout:

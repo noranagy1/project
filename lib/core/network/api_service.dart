@@ -18,9 +18,9 @@ Future <dynamic> get(String endpoint) async {
   }
 }
   /// post
-  Future <dynamic> post(String endpoint, Map<String, dynamic> body) async {
+  Future <dynamic> post(String endpoint, Map<String, dynamic> body, {Options? options}) async {
     try {
-      final response = await _dioClient.dio.post(endpoint, data: body);
+      final response = await _dioClient.dio.post(endpoint, data: body , options: options);
       return response.data;
     } on DioException catch (e) {
       throw ApiExceptions.handleError(e);

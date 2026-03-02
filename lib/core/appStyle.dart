@@ -17,5 +17,4 @@ class AppStyle{
       centerTitle: true,
     ),
   );
-
 }

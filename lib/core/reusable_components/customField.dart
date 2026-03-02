@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
 class Customfield extends StatefulWidget {
-  String hint;
-  Widget prefixIcon;
+  String? label;
+  String? hint;
+  int? lines;
   TextEditingController controller;
   TextInputType keyboardType;
   bool isObscured;
   String? Function(String?) validator; /// ال validator عبارة عن function بتاخد النص اللي اتكتب ولو فيه خطأ بترجع رسالة خطأ، ولو صح بترجع null
   Customfield({
+    this.lines,
+     this.label,
+    this.hint,
     required this.validator,
     super.key,
     this.isObscured = false,
     required this.keyboardType,
-    required this.hint,
-    required this.prefixIcon,
     required this.controller,
   });
-
   @override
   State<Customfield> createState() => _CustomfieldState();
 }
-
 class _CustomfieldState extends State<Customfield> {
   bool passwordToggle = true;
   @override
@@ -30,40 +30,39 @@ class _CustomfieldState extends State<Customfield> {
       keyboardType: widget.keyboardType,
       autovalidateMode: AutovalidateMode.onUserInteraction, /// السطر ده بيخلي التحقق يظهر بعد ما المستخدم يبدأ يكتب في الحقل
       obscureText: widget.isObscured ? passwordToggle : false,
+      maxLines: widget.isObscured == true ? 1 : widget.lines ?? 1,
       cursorHeight: 20,
       decoration: InputDecoration(
+        fillColor:  Colors.white,
+        filled: true,
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 15,
+        ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(50),
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: Color(0xFF6C6C6C),
+            width: 1,
+            color: Colors.grey,
           ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(
-            color: Color(0xFF6C6C6C),
+            color: Colors.blue,
           ),
         ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(
-            color: Color(0xFF6C6C6C),
-          ),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(
-            color: Color(0xFF6C6C6C),
-          ),
-        ),
+        labelText: widget.label,
         hintText: widget.hint,
-        hintStyle: TextStyle(
-          color: Color(0xFF6C6C6C),
+        floatingLabelBehavior: FloatingLabelBehavior.always,
+        labelStyle: TextStyle(
+          color: Colors.grey,
+          fontSize: 15,
+          fontWeight: FontWeight.w400,
         ),
-        prefixIcon: widget.prefixIcon,
         suffixIcon: widget.isObscured ? IconButton( /// ده شرط بيقرر يظهر العين ولا لأ
           icon: Icon(
-            color: Color(0xFF6C6C6C),
+            color: Colors.grey,
             passwordToggle
                 ?Icons.visibility_rounded
                 :Icons.visibility_off_rounded, /// شكل العين بيتغير حسب حالة الباسورد

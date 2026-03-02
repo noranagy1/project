@@ -1,0 +1,54 @@
+import 'package:attendo/core/color_manager.dart';
+import 'package:flutter/material.dart';
+class ProfileHeader extends StatelessWidget {
+  final String name;
+  final String email;
+  final VoidCallback onTap;
+  const ProfileHeader({
+    super.key,
+    required this.name,
+    required this.email,
+    required this.onTap,
+  });
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 30,
+            backgroundColor: ColorManager.white,
+            child: Icon(
+              Icons.person_rounded,
+              size: 50,
+              color: ColorManager.gradientStart,
+            ),
+          ),
+          SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  email,
+                  style: TextStyle(
+                    color: ColorManager.white70,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
