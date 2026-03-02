@@ -13,7 +13,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final bool showLogoutMessage;
+  const LoginScreen({super.key, this.showLogoutMessage = false});
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
@@ -26,6 +27,12 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
     emailController = TextEditingController();
     passwordController = TextEditingController();
+    if (widget.showLogoutMessage) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            customSnack('Logout Successfully'));
+      });
+    }
   }
   @override
   void dispose() {
@@ -119,7 +126,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                     onValueChanged: (value) {
                       if (value == 'register') {
-                        context.go('/register');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => RegisterScreen()),
+                        );
                       } else {
                         setState(() => selectedTab = value!);
                       }
@@ -195,11 +206,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                             onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => EmployeeScreen()),
-                              );
                               login();
                             },
                             child: Text(

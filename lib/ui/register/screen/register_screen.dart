@@ -5,6 +5,7 @@ import 'package:attendo/core/reusable_components/customButton.dart';
 import 'package:attendo/core/reusable_components/customField.dart';
 import 'package:attendo/core/reusable_components/customSnackBar.dart';
 import 'package:attendo/features/auth/data/auth_repo.dart';
+import 'package:attendo/ui/login/screen/login_screen.dart';
 import 'package:attendo/ui/security/screen/security_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -119,7 +120,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         },
                         onValueChanged: (value) {
                           if (value == 'login') {
-                            context.go('/login');
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => LoginScreen()),
+                            );
                           } else {
                             setState(() => selectedTab = value!);
                           }
@@ -203,10 +207,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           /// لما المستخدم يضغط على زرار التسجيل، التطبيق بيتأكد الأول إن كل البيانات اللي في الفورم صح باستخدام validate
                            /// معني validate() انه راح شغل كله ال validators اللى فى form عشان يتأكد ان البيانات صح
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => SecurityScreen()),
-                            );
                             register();
                           },
                         ),

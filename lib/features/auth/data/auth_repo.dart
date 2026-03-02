@@ -18,23 +18,25 @@ class AuthRepo {
         final msg = response['message']?.toString();
         final code = response['code'];
         final coder =
-            code is int ? code : int.tryParse(code?.toString() ?? '0') ?? 0;
+        code is int ? code : int.tryParse(code?.toString() ?? '0') ?? 0;
         final data = response['employee'];
-        final token = response['token'];
+        final token = response['token']?.toString(); // ✅ تحويل لـ String
+
         if (data == null) {
           throw ApiError(message: "No user data returned");
         }
-        if (coder != 200 && coder != 201) {
-          throw ApiError(message: msg ?? "Unknown Error");
+
+        // ✅ حفظ الـ token مباشرة من الـ response مش من الـ user
+        if (token != null && token.isNotEmpty) {
+          await PrefHelper.saveToken(token);
         }
+
         final employeeData =
-            data is Map<String, dynamic> ? Map<String, dynamic>.from(data) : <String, dynamic>{};
+        data is Map<String, dynamic> ? Map<String, dynamic>.from(data) : <String, dynamic>{};
         employeeData['token'] = token;
-        employeeData['password'] = password; // Add password to satisfy UserModel
+        employeeData['password'] = password;
+
         final user = UserModel.fromJson(employeeData);
-        if (user.token != null && user.token!.isNotEmpty) {
-          await PrefHelper.saveToken(user.token!);
-        }
         return user;
       } else {
         throw ApiError(message: 'Unexpected Error from server');
@@ -85,25 +87,18 @@ class AuthRepo {
     String? token = await PrefHelper.getToken();
     if (token == null) throw ApiError(message: "No token found");
     try {
-      final response = await apiService.post(
+      await apiService.post(
         '/api/auth/logout',
         {},
         options: Options(
           headers: {"Authorization": "Bearer $token"},
         ),
       );
-      if (response is ApiError) throw response;
-      final code = response['code'];
-      final coder =
-          code is int ? code : int.tryParse(code?.toString() ?? '0') ?? 0;
-      if (coder != 200 && coder != 201) {
-        final msg = response['message']?.toString();
-        throw ApiError(message: msg ?? "Logout failed");
-      }
-
+      // مش محتاجين نشيك على الـ code، لو السيرفر رد بـ 200 يبقى نجح
       await PrefHelper.clearToken();
+    } on DioException catch (e) {
+      throw ApiExceptions.handleError(e);
     } catch (e) {
       throw ApiError(message: e.toString());
     }
-  }
-}
+  }}

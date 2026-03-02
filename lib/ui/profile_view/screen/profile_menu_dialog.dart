@@ -1,5 +1,6 @@
 import 'package:attendo/core/appStyle.dart';
 import 'package:attendo/core/reusable_components/customSnackBar.dart';
+import 'package:attendo/core/utils/pref_helpers.dart';
 import 'package:attendo/features/auth/data/auth_repo.dart';
 import 'package:attendo/ui/login/screen/login_screen.dart';
 import 'package:attendo/ui/profile_view/screen/notification_dialog.dart';
@@ -17,19 +18,18 @@ class _ProfileMenuDialogState extends State<ProfileMenuDialog> {
   Future<void> logout() async {
     try {
       await authRepo.logout();
+      if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
+        MaterialPageRoute(builder: (context) => LoginScreen(showLogoutMessage: true)),
             (route) => false,
       );
-      ScaffoldMessenger.of(context).showSnackBar(
-          customSnack('Logout Successfully'));
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
           customSnack('Logout failed: ${e.toString()}'));
     }
-  }
-  String notificationValue = "Allow";
+  }  String notificationValue = "Allow";
   @override
   Widget build(BuildContext context) {
     return  Dialog(
