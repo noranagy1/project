@@ -2,6 +2,7 @@ import 'package:attendo/core/appStyle.dart';
 import 'package:attendo/core/reusable_components/customSnackBar.dart';
 import 'package:attendo/core/utils/pref_helpers.dart';
 import 'package:attendo/features/auth/data/auth_repo.dart';
+import 'package:attendo/features/auth/data/user_model.dart';
 import 'package:attendo/ui/login/screen/login_screen.dart';
 import 'package:attendo/ui/profile_view/screen/notification_dialog.dart';
 import 'package:attendo/ui/profile_view/screen/profile_edit.dart';
@@ -13,6 +14,23 @@ class ProfileMenuDialog extends StatefulWidget {
   State<ProfileMenuDialog> createState() => _ProfileMenuDialogState();
 }
 class _ProfileMenuDialogState extends State<ProfileMenuDialog> {
+  UserModel? user;
+  @override
+  void initState() {
+    super.initState();
+    getProfile();
+  }
+  Future<void> getProfile() async {
+    try {
+      final token = await PrefHelper.getToken();
+      print('Token in getProfile: $token'); // شوفي الـ token موجود ولا لأ
+      final data = await authRepo.getProfile();
+      if (!mounted) return;
+      setState(() => user = data);
+    } catch (e) {
+      print(e);
+    }
+  }
   bool isLoading = false;
   AuthRepo authRepo = AuthRepo();
   Future<void> logout() async {
@@ -61,7 +79,7 @@ class _ProfileMenuDialogState extends State<ProfileMenuDialog> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Your name",
+                        user?.name ?? 'Loading...',
                         style: TextStyle(
                           fontSize: 15,
                           color: Colors.grey.shade700,
@@ -69,7 +87,7 @@ class _ProfileMenuDialogState extends State<ProfileMenuDialog> {
                       ),
                       SizedBox(height: 1),
                       Text(
-                        "yourname@gmail.com",
+                        user?.email ?? 'Loading...',
                         style: TextStyle(
                           color: Colors.grey,
                         ),

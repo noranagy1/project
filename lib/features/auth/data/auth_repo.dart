@@ -20,22 +20,19 @@ class AuthRepo {
         final coder =
         code is int ? code : int.tryParse(code?.toString() ?? '0') ?? 0;
         final data = response['employee'];
-        final token = response['token']?.toString(); // ✅ تحويل لـ String
-
+        final token = response['token']?.toString();
         if (data == null) {
           throw ApiError(message: "No user data returned");
         }
-
-        // ✅ حفظ الـ token مباشرة من الـ response مش من الـ user
         if (token != null && token.isNotEmpty) {
           await PrefHelper.saveToken(token);
         }
-
         final employeeData =
-        data is Map<String, dynamic> ? Map<String, dynamic>.from(data) : <String, dynamic>{};
+        data is Map<String, dynamic> ? Map<String, dynamic>.from(data) : <
+            String,
+            dynamic>{};
         employeeData['token'] = token;
         employeeData['password'] = password;
-
         final user = UserModel.fromJson(employeeData);
         return user;
       } else {
@@ -48,8 +45,8 @@ class AuthRepo {
     }
   }
   /// register
-  Future<UserModel?> register(
-      String name, String email, String password, String role) async {
+  Future<UserModel?> register(String name, String email, String password,
+      String role) async {
     try {
       final response = await apiService.post('/api/auth/signup', {
         'name': name,
@@ -64,7 +61,7 @@ class AuthRepo {
         final msg = response['message']?.toString();
         final code = response['code'];
         final coder =
-            code is int ? code : int.tryParse(code?.toString() ?? '0') ?? 0;
+        code is int ? code : int.tryParse(code?.toString() ?? '0') ?? 0;
         if (coder != 200 && coder != 201) {
           throw ApiError(message: msg?.toString() ?? "Unknown Error");
         }
@@ -94,11 +91,41 @@ class AuthRepo {
           headers: {"Authorization": "Bearer $token"},
         ),
       );
-      // مش محتاجين نشيك على الـ code، لو السيرفر رد بـ 200 يبقى نجح
       await PrefHelper.clearToken();
     } on DioException catch (e) {
       throw ApiExceptions.handleError(e);
     } catch (e) {
       throw ApiError(message: e.toString());
     }
-  }}
+  }
+  /// Get Profile
+  Future<UserModel?> getProfile() async {
+    try {
+      final response = await apiService.get('/api/employee/profile');
+      if (response is Map<String, dynamic>) {
+        return UserModel.fromJson(response); // شيلنا ['employee']
+      } else {
+        throw ApiError(message: 'Unexpected Error');
+      }
+    } on DioException catch (e) {
+      throw ApiExceptions.handleError(e);
+    } catch (e) {
+      throw ApiError(message: e.toString());
+    }
+  }
+  /// Update Profile
+  Future<void> updateProfile(String name, String email,
+      String cardNumber) async {
+    try {
+      await apiService.put('/api/employee/update-profile', {
+        'name': name,
+        'email': email,
+        'cardNumber': cardNumber,
+      });
+    } on DioException catch (e) {
+      throw ApiExceptions.handleError(e);
+    } catch (e) {
+      throw ApiError(message: e.toString());
+    }
+  }
+}

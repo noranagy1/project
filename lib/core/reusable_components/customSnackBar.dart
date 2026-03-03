@@ -16,17 +16,21 @@ return SnackBar(
     elevation: 10,
     behavior: SnackBarBehavior.floating,
     clipBehavior: Clip.none,
-    backgroundColor: Colors.red,
+    backgroundColor: Colors.green,
     content: Row(
       children: [
         Icon(CupertinoIcons.info, color: Colors.white),
         Gap(10),
-        Text(
-          errorMsg,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
+        Expanded(
+          child: Text(
+            errorMsg,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2,
           ),
         ),
       ],

@@ -2,14 +2,37 @@ import 'package:attendo/core/appStyle.dart';
 import 'package:attendo/core/color_manager.dart';
 import 'package:attendo/core/reusable_components/box.dart';
 import 'package:attendo/core/reusable_components/submit_complaint.dart';
+import 'package:attendo/core/utils/pref_helpers.dart';
+import 'package:attendo/features/auth/data/auth_repo.dart';
+import 'package:attendo/features/auth/data/user_model.dart';
 import 'package:attendo/ui/QR/screen/qr_screen.dart';
 import 'package:attendo/ui/profile_view/screen/profile_header.dart';
 import 'package:attendo/ui/profile_view/screen/profile_menu_dialog.dart';
 import 'package:flutter/material.dart';
-
-class EmployeeScreen extends StatelessWidget {
+class EmployeeScreen extends StatefulWidget {
   const EmployeeScreen({super.key});
-
+  @override
+  State<EmployeeScreen> createState() => _EmployeeScreenState();
+}
+class _EmployeeScreenState extends State<EmployeeScreen> {
+  AuthRepo authRepo = AuthRepo();
+  UserModel? user;
+  @override
+  void initState() {
+    super.initState();
+    getProfile();
+  }
+  Future<void> getProfile() async {
+    try {
+      final token = await PrefHelper.getToken();
+      print('Token in getProfile: $token'); // شوفي الـ token موجود ولا لأ
+      final data = await authRepo.getProfile();
+      if (!mounted) return;
+      setState(() => user = data);
+    } catch (e) {
+      print(e);
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return ScrollConfiguration(
@@ -72,16 +95,17 @@ class EmployeeScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       ProfileHeader(
-                        name: "MS: Reem farghaly Mongy",
-                        email: "yourname@gmail.com",
-                        onTap: () {
-                          showDialog(
+                        name: user?.name ?? 'Loading...',
+                        email: user?.email ?? 'Loading...',
+                        onTap: () async {
+                         await showDialog(
                             context: context,
                             barrierColor: Colors.black.withOpacity(0.4),
                             builder: (context) {
                               return ProfileMenuDialog();
                             },
                           );
+                          getProfile();
                         },
                       ),
                       SizedBox(height: 15),

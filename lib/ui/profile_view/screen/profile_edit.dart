@@ -1,7 +1,11 @@
 import 'package:attendo/core/appStyle.dart';
+import 'package:attendo/core/network/api_error.dart';
 import 'package:attendo/core/reusable_components/customButton.dart';
 import 'package:attendo/core/reusable_components/customField.dart';
-import 'package:attendo/ui/profile_view/screen/profile_menu_dialog.dart';
+import 'package:attendo/core/reusable_components/customSnackBar.dart';
+import 'package:attendo/core/utils/pref_helpers.dart';
+import 'package:attendo/features/auth/data/auth_repo.dart';
+import 'package:attendo/features/auth/data/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 class ProfileEdit extends StatefulWidget {
@@ -20,6 +24,7 @@ class _ProfileEditState extends State<ProfileEdit> {
     nameController = TextEditingController();
     emailController = TextEditingController();
     carNumberController = TextEditingController();
+    getProfile();
   }
   @override
   void dispose() {
@@ -29,7 +34,46 @@ class _ProfileEditState extends State<ProfileEdit> {
     emailController.dispose();
     carNumberController.dispose();
   }
-  @override
+  bool isLoading = false;
+  AuthRepo authRepo = AuthRepo();
+  Future<void> updateProfile() async {
+    print('name: ${nameController.text}');
+    print('email: ${emailController.text}');
+    if (nameController.text.trim().isEmpty || emailController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(customSnack('Please fill all fields'));
+      return;
+    }
+    setState(() => isLoading = true);
+    try {
+      await authRepo.updateProfile(
+        nameController.text.trim(),
+        emailController.text.trim(),
+        carNumberController.text.trim(),
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(customSnack('Profile updated successfully'));
+      Navigator.pop(context, true);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => isLoading = false);
+      final errorMsg = e is ApiError ? e.message : 'Unknown error';
+      ScaffoldMessenger.of(context).showSnackBar(customSnack(errorMsg));
+    }
+  }
+  UserModel? user;
+  Future<void> getProfile() async {
+    try {
+      final token = await PrefHelper.getToken();
+      print('Token in getProfile: $token');
+      final data = await authRepo.getProfile();
+      if (!mounted) return;
+      setState(() {
+        user = data;
+      });
+    } catch (e) {
+      print(e);
+    }
+  }  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppStyle.lightTheme.scaffoldBackgroundColor,
@@ -66,7 +110,6 @@ class _ProfileEditState extends State<ProfileEdit> {
                     },
                   )
               ),
-              /// ===== Top Profile Section =====
               Padding(
                 padding: const EdgeInsets.only(
                   top: 80,
@@ -77,7 +120,6 @@ class _ProfileEditState extends State<ProfileEdit> {
                   children: [
                     Row(
                       children: [
-                    /// Profile Image
                     Stack(
                       children: [
                         const CircleAvatar(
@@ -86,7 +128,6 @@ class _ProfileEditState extends State<ProfileEdit> {
                           child: Icon(
                               Icons.person_2_outlined, size: 70, color: Color(0xffddf4fd)),
                         ),
-                        /// Edit icon
                         Positioned(
                           bottom: 0,
                           right: 0,
@@ -113,12 +154,11 @@ class _ProfileEditState extends State<ProfileEdit> {
                       ],
                     ),
                     const SizedBox(width: 15),
-                    /// Name & Email
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
-                          "Your name",
+                          user?.name ?? 'Loading...',
                           style: TextStyle(
                             fontSize: 18,
                             color: Colors.black,
@@ -126,7 +166,7 @@ class _ProfileEditState extends State<ProfileEdit> {
                         ),
                         SizedBox(height: 4),
                         Text(
-                          "yourname@gmail.com",
+                          user?.email ?? 'Loading...',
                           style: TextStyle(
                             color: Colors.grey,
                             fontSize: 14,
@@ -172,9 +212,6 @@ class _ProfileEditState extends State<ProfileEdit> {
                       Gap(30),
                       Customfield(
                         validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'should\'t be empty';
-                          }
                           return null;
                         },
                         keyboardType: TextInputType.text,
@@ -190,9 +227,7 @@ class _ProfileEditState extends State<ProfileEdit> {
                           buttonColor: Color(0xFF3E8DFB),
                           text: "Save Change",
                           onPressed: () {
-                            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ProfileMenuDialog(),
-                            ),
-                            );
+                            updateProfile();
                           },
                         ),
                       ),
