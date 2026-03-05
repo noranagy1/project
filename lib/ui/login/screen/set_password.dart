@@ -1,4 +1,5 @@
 import 'package:attendo/core/appStyle.dart';
+import 'package:attendo/core/extensions.dart';
 import 'package:attendo/core/reusable_components/customButton.dart';
 import 'package:attendo/core/reusable_components/customField.dart';
 import 'package:flutter/material.dart';
@@ -65,7 +66,7 @@ class _SetPasswordState extends State<SetPassword> {
                   ),
                   Gap(30),
                   Text(
-                    'Set a new password',
+                    context.l10n.set_new_password,
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w600,
@@ -74,7 +75,7 @@ class _SetPasswordState extends State<SetPassword> {
                   ),
                   Gap(15),
                   Text(
-                    'Create a new password. Ensure it differs from previous ones for security',
+                    context.l10n.set_new_password_msg,
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey.shade600,
@@ -84,15 +85,15 @@ class _SetPasswordState extends State<SetPassword> {
                   SizedBox(
                     width: double.infinity,
                     child: Customfield(
-                      label: 'Password',
+                      label: context.l10n.password,
                       validator: (value) {
                         if(value == null || value.isEmpty) {
-                          return 'should\'t be empty';
+                          return context.l10n.shouldnt_be_empty;
                         }
                         /// بيتأكد إن الإيميل مكتوب بطريقة صحيحة باستخدام Regex
                         if (!RegExp(emailRegex).hasMatch(value)) { /// لو القيمة اللي المستخدم كتبها مش بتطابق شكل الإيميل الصح
                           /// ! دي معناها not يعنى لو الايميل غلط قول كده
-                          return 'invalid email';
+                          return context.l10n.invalid_email;
                         }
                         return null;
                       },
@@ -105,15 +106,15 @@ class _SetPasswordState extends State<SetPassword> {
                   SizedBox(
                     width: double.infinity,
                     child: Customfield(
-                      label: 'Confirm Password',
+                      label: context.l10n.confirm_password,
                       validator: (value) {
                         if(value == null || value.isEmpty) {
-                          return 'should\'t be empty';
+                          return context.l10n.shouldnt_be_empty;
                         }
                         /// بيتأكد إن الإيميل مكتوب بطريقة صحيحة باستخدام Regex
                         if (!RegExp(emailRegex).hasMatch(value)) { /// لو القيمة اللي المستخدم كتبها مش بتطابق شكل الإيميل الصح
                           /// ! دي معناها not يعنى لو الايميل غلط قول كده
-                          return 'invalid email';
+                          return context.l10n.invalid_email;
                         }
                         return null;
                       },
@@ -129,7 +130,7 @@ class _SetPasswordState extends State<SetPassword> {
                       onPressed: () {},
                       buttonColor: Color(0xFF3870E4),
                       text:
-                      'Update Password',
+                      context.l10n.update_password,
                     ),
                   ),
                 ],

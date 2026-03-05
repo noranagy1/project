@@ -1,4 +1,5 @@
 import 'package:attendo/core/appStyle.dart';
+import 'package:attendo/core/extensions.dart';
 import 'package:attendo/core/reusable_components/customField.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -90,7 +91,7 @@ class _SubmitComplaintState extends State<SubmitComplaint> {
                   ),
                   child:  Center(
                     child: Text(
-                      "Submit a formal complaint",
+                      context.l10n.submit_formal_complaint,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -99,7 +100,7 @@ class _SubmitComplaintState extends State<SubmitComplaint> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 40),
+                SizedBox(height: 40),
                 /// ===== Form =====
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -108,37 +109,37 @@ class _SubmitComplaintState extends State<SubmitComplaint> {
                       Customfield(
                           validator: (value) {
                             if(value == null || value.isEmpty) {
-                              return 'should\'t be empty';
+                              return context.l10n.shouldnt_be_empty;
                             }
                             return null;
                           },
                           keyboardType: TextInputType.name,
                           controller: nameController,
-                        hint: "Name",
+                        hint: context.l10n.name,
                       ),
                       Gap(30),
                       Customfield(
                         validator: (value) {
                           if(value == null || value.isEmpty) {
-                            return 'should\'t be empty';
+                            return context.l10n.shouldnt_be_empty;
                           }
                           return null;
                         },
                         keyboardType: TextInputType.text,
                         controller: jobController,
-                        hint: "Job or department",
+                        hint: context.l10n.job_department,
                       ),
                       Gap(30),
                       Customfield(
                         validator: (value) {
                           if(value == null || value.isEmpty) {
-                            return 'should\'t be empty';
+                            return context.l10n.shouldnt_be_empty;
                           }
                           return null;
                         },
                         keyboardType: TextInputType.text,
                         controller: tittleController,
-                        hint: "Report title",
+                        hint: context.l10n.report_title,
                       ),
                       Gap(30),
                       SizedBox(
@@ -146,22 +147,22 @@ class _SubmitComplaintState extends State<SubmitComplaint> {
                           lines: 6,
                           validator: (value) {
                             if(value == null || value.isEmpty) {
-                              return 'should\'t be empty';
+                              return context.l10n.shouldnt_be_empty;
                             }
                             return null;
                           },
                           keyboardType: TextInputType.text,
                           controller: detailsController,
-                          hint: "Report details",
+                          hint: context.l10n.report_details,
                         ),
                       ),
-                      const SizedBox(height: 35),
+                      SizedBox(height: 35),
                       /// Date Field
                       TextField(
                         controller: dateController,
                         readOnly: true,
                         decoration: InputDecoration(
-                          hintText: "Date of complaint",
+                          hintText: context.l10n.date_of_complaint,
                           contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                           suffixIcon: Icon(Icons.calendar_today_outlined),
                           border: OutlineInputBorder(
@@ -202,15 +203,15 @@ class _SubmitComplaintState extends State<SubmitComplaint> {
                             ),
                           ),
                           onPressed: () {},
-                          child: const Text(
-                            "Send",
+                          child: Text(
+                            context.l10n.send,
                             style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.white),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 40),
+                      SizedBox(height: 40),
                     ],
                   ),
                 ),

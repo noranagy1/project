@@ -1,4 +1,5 @@
 import 'package:attendo/core/appStyle.dart';
+import 'package:attendo/core/extensions.dart';
 import 'package:attendo/features/auth/data/qr_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -61,10 +62,10 @@ class _QrScreenState extends State<QrScreen> {
                       return const CircularProgressIndicator();
                     }
                     if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
+                      return Text('context.l10n.error: ${snapshot.error}');
                     }
                     if (snapshot.data == null) {
-                      return const Text('No QR data found');
+                      return Text(context.l10n.no_qr_data);
                     }
                     return QrImageView(
                       data: snapshot.data!,

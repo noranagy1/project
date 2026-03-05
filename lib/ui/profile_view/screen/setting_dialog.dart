@@ -1,12 +1,15 @@
+import 'package:attendo/core/extensions.dart';
+import 'package:attendo/core/locale_provider.dart';
 import 'package:attendo/ui/profile_view/screen/option_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 class SettingsDialog extends StatefulWidget {
   const SettingsDialog({super.key});
   @override
   State<SettingsDialog> createState() => _SettingsDialogState();
 }
 class _SettingsDialogState extends State<SettingsDialog> {
-  String selectedTheme = "Light";
+  late String selectedTheme = context.l10n.light;
   String selectedLanguage = "Eng";
   @override
   Widget build(BuildContext context) {
@@ -27,8 +30,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  "Settings",
+                Text(
+                  context.l10n.settings,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -37,27 +40,27 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 InkWell(
                   borderRadius: BorderRadius.circular(20),
                   onTap: () => Navigator.pop(context),
-                  child: const Icon(Icons.close),
+                  child: Icon(Icons.close),
                 ),
               ],
             ),
-            const SizedBox(height: 15),
+             SizedBox(height: 15),
             Divider(color: Colors.grey.shade300),
-            const SizedBox(height: 10),
+             SizedBox(height: 10),
             /// ===== Theme =====
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text("Theme"),
+              title: Text(context.l10n.theme),
               trailing: Text(
                 selectedTheme,
-                style: const TextStyle(color: Colors.grey),
+                style: TextStyle(color: Colors.grey),
               ),
               onTap: () async {
                 final result = await showDialog(
                   context: context,
                   builder: (_) => OptionDialog(
-                    title: "Theme",
-                    options: const ["Light", "Dark"],
+                    title: context.l10n.theme,
+                    options: [context.l10n.light, context.l10n.dark],
                     currentValue: selectedTheme,
                   ),
                 );
@@ -71,17 +74,17 @@ class _SettingsDialogState extends State<SettingsDialog> {
             /// ===== Language =====
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text("Language"),
+              title: Text(context.l10n.language),
               trailing: Text(
                 selectedLanguage,
-                style: const TextStyle(color: Colors.grey),
+                style: TextStyle(color: Colors.grey),
               ),
               onTap: () async {
                 final result = await showDialog(
                   context: context,
                   builder: (_) => OptionDialog(
-                    title: "Language",
-                    options: const ["Eng", "Ar"],
+                    title: context.l10n.language,
+                    options: ["Eng", "Ar"],
                     currentValue: selectedLanguage,
                   ),
                 );
@@ -89,10 +92,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   setState(() {
                     selectedLanguage = result;
                   });
+                  final locale = result == "Ar" ? const Locale('ar') : const Locale('en');
+                  Provider.of<LocaleProvider>(context, listen: false).setLocale(locale);
                 }
               },
-            ),
-          ],
+            ),          ],
         ),
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:attendo/core/appStyle.dart';
 import 'package:attendo/core/constants.dart';
+import 'package:attendo/core/extensions.dart';
 import 'package:attendo/core/network/api_error.dart';
 import 'package:attendo/core/reusable_components/customButton.dart';
 import 'package:attendo/core/reusable_components/customField.dart';
@@ -37,7 +38,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
   String? selectedRole;
   bool isLoading = false;
-  String selectedTab = 'register';
+  late String selectedTab = context.l10n.register;
   AuthRepo authRepo = AuthRepo();
   Future<void> register() async {
     if (formKey.currentState!.validate()) {
@@ -47,18 +48,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
               nameController.text.trim(), emailController.text.trim(),
               passwordController.text.trim(), selectedRole!.trim());
           if (user != null) {
-            ScaffoldMessenger.of(context).showSnackBar(customSnack('Registration success'));
+            ScaffoldMessenger.of(context).showSnackBar(customSnack(context.l10n.registration_success));
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => SecurityScreen()),
             );
           } else {
-            ScaffoldMessenger.of(context).showSnackBar(customSnack('Registration failed'));
+            ScaffoldMessenger.of(context).showSnackBar(customSnack(context.l10n.registration_failed));
           }
           setState(() => isLoading = false);
         } catch (e) {
           setState(() => isLoading = false);
-          String errorMsg = 'error in register';
+          String errorMsg = context.l10n.error_in_register;
           if (e is ApiError) {
             errorMsg = e.message;
           }
@@ -88,7 +89,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         fit: BoxFit.fitHeight,
                       ),
                       Text(
-                        'Get Started now',
+                        context.l10n.get_started,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 32,
@@ -97,7 +98,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       Gap(8),
                       Text(
-                        'Create an account or log in to explore \n about our app',
+                        context.l10n.create_or_login,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             fontSize: 12,
@@ -109,17 +110,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       CupertinoSlidingSegmentedControl<String>(
                         groupValue: selectedTab,
                         children: {
-                          'login': Padding(
+                          context.l10n.login: Padding(
                             padding: EdgeInsets.all(8),
-                            child: Text('Log In'),
+                            child: Text(context.l10n.log_in),
                           ),
-                          'register': Padding(
+                          context.l10n.register: Padding(
                             padding: EdgeInsets.all(8),
-                            child: Text('Sign Up'),
+                            child: Text(context.l10n.sign_up),
                           ),
                         },
                         onValueChanged: (value) {
-                          if (value == 'login') {
+                          if (value == context.l10n.login) {
                             Navigator.push(
                               context,
                               MaterialPageRoute(builder: (context) => LoginScreen()),
@@ -135,11 +136,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         /// لو الحقل فاضي بيظهر رسالة خطأ، ولو المستخدم كتب بيانات صح بيرجع null وبيسمح للفورم يكمل
                         validator: (value) {
                           if(value == null || value.isEmpty) {
-                            return 'should\'t be empty';
+                            return context.l10n.shouldnt_be_empty;
                           }
                           return null;
                         },
-                        label: 'Name',
+                        label: context.l10n.name,
                         controller: nameController,
                         keyboardType: TextInputType.name,
                       ),
@@ -147,16 +148,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       Customfield(
                         validator: (value) {
                           if(value == null || value.isEmpty) {
-                            return 'should\'t be empty';
+                            return context.l10n.shouldnt_be_empty;
                           }
                           /// بيتأكد إن الإيميل مكتوب بطريقة صحيحة باستخدام Regex
                           if (!RegExp(emailRegex).hasMatch(value)) {
                        /// ! دي معناها not يعنى لو الايميل غلط قول كده
-                            return 'invalid email';
+                            return context.l10n.invalid_email;
                           }
                           return null;
                         },
-                        label: 'Email',
+                        label: context.l10n.email,
                         controller: emailController,
                         keyboardType: TextInputType.emailAddress,
                       ),
@@ -165,14 +166,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         /// الـ validator هنا بيتأكد إن المستخدم مايسيبش الباسورد فاضي، وكمان بيتأكد إن الباسورد يكون 8 حروف على الأقل
                         validator: (value) {
                           if(value == null || value.isEmpty) {
-                            return 'should\'t be empty';
+                            return context.l10n.shouldnt_be_empty;
                           }
                           if(value.length < 8) {
-                            return 'password should\'be at least 8 characters';
+                            return context.l10n.password_min;
                           }
                           return null;
                         },
-                        label: 'Password',
+                        label: context.l10n.password,
                         controller: passwordController,
                         keyboardType: TextInputType.visiblePassword,
                         isObscured: true,
@@ -182,8 +183,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         dropdownColor: AppStyle.lightTheme.scaffoldBackgroundColor,
                         isExpanded: true,
                           value: selectedRole,
-                          hint: Text('Select Role'),
-                          items: ['employee', 'security'].map((role) {
+                          hint: Text(context.l10n.select_role),
+                          items: [context.l10n.employee, context.l10n.security].map((role) {
                             return DropdownMenuItem(
                               value: role,
                               child: Text(role),
@@ -202,7 +203,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           : SizedBox(
                         width: double.infinity,
                         child: Custombutton(
-                          text: 'Register',
+                          text: context.l10n.register,
                           buttonColor: Color(0xFF3870E4),
                           /// لما المستخدم يضغط على زرار التسجيل، التطبيق بيتأكد الأول إن كل البيانات اللي في الفورم صح باستخدام validate
                            /// معني validate() انه راح شغل كله ال validators اللى فى form عشان يتأكد ان البيانات صح

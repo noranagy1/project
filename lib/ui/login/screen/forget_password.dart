@@ -1,5 +1,6 @@
 import 'package:attendo/core/appStyle.dart';
 import 'package:attendo/core/constants.dart';
+import 'package:attendo/core/extensions.dart';
 import 'package:attendo/core/reusable_components/customButton.dart';
 import 'package:attendo/core/reusable_components/customField.dart';
 import 'package:attendo/ui/login/screen/check_email.dart';
@@ -65,7 +66,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                   ),
                                   Gap(30),
                                   Text(
-                                          'Forgot password',
+                                    context.l10n.forgot_password,
                                         style: TextStyle(
                                           fontSize: 22,
                                           fontWeight: FontWeight.w600,
@@ -74,7 +75,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                       ),
                                   Gap(15),
                                   Text(
-                                        'Please enter your email to reset the password',
+                                    context.l10n.enter_email_reset,
                                         style: TextStyle(
                                           fontSize: 16,
                                           color: Colors.grey.shade600,
@@ -84,15 +85,15 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                   SizedBox(
                                     width: double.infinity,
                                     child: Customfield(
-                                            label: 'Your Email',
+                                            label: context.l10n.your_email,
                                             validator: (value) {
                                               if(value == null || value.isEmpty) {
-                                                return 'should\'t be empty';
+                                                return context.l10n.shouldnt_be_empty;
                                               }
                                               /// بيتأكد إن الإيميل مكتوب بطريقة صحيحة باستخدام Regex
                                               if (!RegExp(emailRegex).hasMatch(value)) { /// لو القيمة اللي المستخدم كتبها مش بتطابق شكل الإيميل الصح
                                                 /// ! دي معناها not يعنى لو الايميل غلط قول كده
-                                                return 'invalid email';
+                                                return context.l10n.invalid_email;
                                               }
                                               return null;
                                             },
@@ -112,7 +113,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                             },
                                       buttonColor: Color(0xFF3870E4),
                                             text:
-                                            'Reset Password',
+                                            context.l10n.reset_password,
                                         ),
                                   ),
                                           ],

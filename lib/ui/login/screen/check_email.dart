@@ -1,4 +1,5 @@
 import 'package:attendo/core/appStyle.dart';
+import 'package:attendo/core/extensions.dart';
 import 'package:attendo/core/reusable_components/customButton.dart';
 import 'package:attendo/ui/login/screen/password_reset.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
@@ -51,7 +52,7 @@ class _CheckEmailState extends State<CheckEmail> {
                   ),
                   SizedBox(height: 30),
                   Text(
-                    'Check your email',
+                    context.l10n.check_email,
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w600,
@@ -60,7 +61,7 @@ class _CheckEmailState extends State<CheckEmail> {
                   ),
                   SizedBox(height: 15),
                   Text(
-                    'We sent a reset link to contact@dscode...com enter 5 digit code that mentioned in the email',
+                    context.l10n.reset_link_sent,
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey.shade600,
@@ -100,7 +101,7 @@ class _CheckEmailState extends State<CheckEmail> {
                       },
                       buttonColor: Color(0xFF3870E4),
                       text:
-                      'Verify Code',
+                      context.l10n.verify_code,
                     ),
                   ),
                   SizedBox(height: 20),
@@ -108,7 +109,7 @@ class _CheckEmailState extends State<CheckEmail> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                 Text(
-                'Have\'t got the email yet?',
+                  context.l10n.havent_got_email,
                 style: TextStyle(
                   color: Color(0xFF6C6C6C),
                   fontWeight: FontWeight.w600,
@@ -117,7 +118,7 @@ class _CheckEmailState extends State<CheckEmail> {
               TextButton(
                 onPressed: () {},
                 child: Text(
-                  'Resend email',
+                  context.l10n.resend_email,
                   style: TextStyle(
                     color: Color(0xFF1D61E7),
                     decoration: TextDecoration.underline,

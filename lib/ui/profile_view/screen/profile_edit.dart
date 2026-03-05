@@ -1,4 +1,5 @@
 import 'package:attendo/core/appStyle.dart';
+import 'package:attendo/core/extensions.dart';
 import 'package:attendo/core/network/api_error.dart';
 import 'package:attendo/core/reusable_components/customButton.dart';
 import 'package:attendo/core/reusable_components/customField.dart';
@@ -40,7 +41,7 @@ class _ProfileEditState extends State<ProfileEdit> {
     print('name: ${nameController.text}');
     print('email: ${emailController.text}');
     if (nameController.text.trim().isEmpty || emailController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(customSnack('Please fill all fields'));
+      ScaffoldMessenger.of(context).showSnackBar(customSnack(context.l10n.please_fill_all_fields));
       return;
     }
     setState(() => isLoading = true);
@@ -56,7 +57,7 @@ class _ProfileEditState extends State<ProfileEdit> {
     } catch (e) {
       if (!mounted) return;
       setState(() => isLoading = false);
-      final errorMsg = e is ApiError ? e.message : 'Unknown error';
+      final errorMsg = e is ApiError ? e.message : context.l10n.unknown_error;
       ScaffoldMessenger.of(context).showSnackBar(customSnack(errorMsg));
     }
   }
@@ -122,7 +123,7 @@ class _ProfileEditState extends State<ProfileEdit> {
                       children: [
                     Stack(
                       children: [
-                        const CircleAvatar(
+                        CircleAvatar(
                           radius: 35,
                           backgroundColor: Colors.white,
                           child: Icon(
@@ -158,7 +159,7 @@ class _ProfileEditState extends State<ProfileEdit> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          user?.name ?? 'Loading...',
+                          user?.name ?? context.l10n.loading,
                           style: TextStyle(
                             fontSize: 18,
                             color: Colors.black,
@@ -166,7 +167,7 @@ class _ProfileEditState extends State<ProfileEdit> {
                         ),
                         SizedBox(height: 4),
                         Text(
-                          user?.email ?? 'Loading...',
+                          user?.email ?? context.l10n.loading,
                           style: TextStyle(
                             color: Colors.grey,
                             fontSize: 14,
@@ -189,25 +190,25 @@ class _ProfileEditState extends State<ProfileEdit> {
                       Customfield(
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'should\'t be empty';
+                            return context.l10n.shouldnt_be_empty;
                           }
                           return null;
                         },
                         keyboardType: TextInputType.name,
                         controller: nameController,
-                        hint: "Name",
+                        hint: context.l10n.name,
                       ),
                       Gap(30),
                       Customfield(
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'should\'t be empty';
+                            return context.l10n.shouldnt_be_empty;
                           }
                           return null;
                         },
                         keyboardType: TextInputType.emailAddress,
                         controller: emailController,
-                        hint: "Email account",
+                        hint: context.l10n.email_account,
                       ),
                       Gap(30),
                       Customfield(
@@ -216,16 +217,15 @@ class _ProfileEditState extends State<ProfileEdit> {
                         },
                         keyboardType: TextInputType.text,
                         controller: carNumberController,
-                        hint: "Car number",
+                        hint: context.l10n.car_number,
                       ),
                       const SizedBox(height: 80),
-                      /// ===== Save Button =====
                       SizedBox(
                         width: 180,
                         height: 65,
                         child: Custombutton(
                           buttonColor: Color(0xFF3E8DFB),
-                          text: "Save Change",
+                          text: context.l10n.save_changes,
                           onPressed: () {
                             updateProfile();
                           },

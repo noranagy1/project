@@ -1,5 +1,6 @@
 import 'package:attendo/core/appStyle.dart';
 import 'package:attendo/core/color_manager.dart';
+import 'package:attendo/core/extensions.dart';
 import 'package:attendo/core/reusable_components/box.dart';
 import 'package:attendo/core/reusable_components/submit_complaint.dart';
 import 'package:attendo/core/utils/pref_helpers.dart';
@@ -95,8 +96,8 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                   child: Column(
                     children: [
                       ProfileHeader(
-                        name: user?.name ?? 'Loading...',
-                        email: user?.email ?? 'Loading...',
+                        name: user?.name ?? context.l10n.loading,
+                        email: user?.email ?? context.l10n.loading,
                         onTap: () async {
                          await showDialog(
                             context: context,
@@ -133,41 +134,19 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                         Box(
                           imagePath: "assets/images/qr.png",
                           imageColor: Color(0xFF082859),
-                          title: "Attendance",
-                          subtitle: "Qr code",
-                          buttonText: "Generate",
-                          onButtonTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => QrScreen()),
-                            );
-                          },
+                          title: context.l10n.attendance,
                         ),
                         Box(
                           imagePath: "assets/images/report.png",
-                          title: "Attendance report",
-                          subtitle: "AR",
-                          buttonText: "View",
-                          onButtonTap: () {},
+                          title: context.l10n.attendance_report,
                         ),
                         Box(
                           imagePath: "assets/images/status.png",
-                          title: "Vehicle report",
-                          subtitle: "VR",
-                          buttonText: "View",
-                          onButtonTap: () {},
+                          title: context.l10n.vehicle_report,
                         ),
                         Box(
                           imagePath: "assets/images/complaint.png",
-                          title: "Submit a complaint",
-                          subtitle: "SC",
-                          buttonText: "Make",
-                          onButtonTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => SubmitComplaint()),
-                            );
-                          },
+                          title: context.l10n.submit_complaint,
                         ),
                       ]
                   ),

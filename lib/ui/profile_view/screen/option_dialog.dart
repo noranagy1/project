@@ -41,7 +41,7 @@ class OptionDialog extends StatelessWidget {
                 ),
               ),
               if (option != options.last)
-                const Divider(height: 1),
+                Divider(height: 1),
             ],
           );
         }).toList(),

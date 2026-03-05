@@ -1,4 +1,5 @@
 import 'package:attendo/core/appStyle.dart';
+import 'package:attendo/core/extensions.dart';
 import 'package:attendo/core/network/api_error.dart';
 import 'package:attendo/core/reusable_components/customSnackBar.dart';
 import 'package:attendo/features/auth/data/auth_repo.dart';
@@ -30,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (widget.showLogoutMessage) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ScaffoldMessenger.of(context).showSnackBar(
-            customSnack('Logout Successfully'));
+            customSnack(context.l10n.logout_successfully));
       });
     }
   }
@@ -55,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       if (!mounted) return;
       if (user != null) {
-        ScaffoldMessenger.of(context).showSnackBar(customSnack('Login success'));
+        ScaffoldMessenger.of(context).showSnackBar(customSnack(context.l10n.login_success));
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => EmployeeScreen()),
@@ -63,13 +64,13 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         setState(() => isLoading = false);
         ScaffoldMessenger.of(context)
-            .showSnackBar(customSnack('Login failed'));
+            .showSnackBar(customSnack(context.l10n.login_failed));
       }
     } catch (e) {
       if (!mounted) return;
       setState(() => isLoading = false);
       final errorMsg =
-      e is ApiError ? e.message : "An unknown error occurred.";
+      e is ApiError ? e.message : context.l10n.unknown_error;
       ScaffoldMessenger.of(context).showSnackBar(customSnack(errorMsg));
     }
   }
@@ -95,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     fit: BoxFit.fitHeight,
                   ),
                   Text(
-                    'Get Started now',
+                    context.l10n.get_started,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 32,
@@ -104,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   Gap(8),
                   Text(
-                    'Create an account or log in to explore\nabout our app',
+                    context.l10n.create_or_login,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                         fontSize: 12,
@@ -117,11 +118,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: {
                       'login': Padding(
                         padding: EdgeInsets.all(8),
-                        child: Text('Log In'),
+                        child: Text(context.l10n.log_in),
                       ),
                       'register': Padding(
                         padding: EdgeInsets.all(8),
-                        child: Text('Sign Up'),
+                        child: Text(context.l10n.sign_up),
                       ),
                     },
                     onValueChanged: (value) {
@@ -140,14 +141,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   Customfield(
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return "shouldn't be empty";
+                        return context.l10n.shouldnt_be_empty;
                       }
                       if (!RegExp(emailRegex).hasMatch(value)) {
-                        return "invalid email";
+                        return context.l10n.invalid_email;
                       }
                       return null;
                     },
-                    label: 'Email',
+                    label: context.l10n.email,
                     controller: emailController,
                     keyboardType: TextInputType.emailAddress,
                   ),
@@ -155,14 +156,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   Customfield(
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return "shouldn't be empty";
+                        return context.l10n.shouldnt_be_empty;
                       }
                       if (value.length < 6) {
-                        return "password should be at least 8 characters";
+                        return context.l10n.password_min;
                       }
                       return null;
                     },
-                    label: 'Password',
+                    label: context.l10n.password,
                     controller: passwordController,
                     keyboardType: TextInputType.visiblePassword,
                     isObscured: true,
@@ -179,7 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         );
                       },
                       child: Text(
-                        'Forgot Password?',
+                        context.l10n.forgot_password_q,
                         style: TextStyle(
                           color: Color(0xFF1D61E7),
                         ),
@@ -209,7 +210,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               login();
                             },
                             child: Text(
-                              'Login',
+                              context.l10n.login,
                               style: TextStyle(
                                 fontSize: 18,
                                 color: Colors.white,

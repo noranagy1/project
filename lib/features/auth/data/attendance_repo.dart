@@ -1,17 +1,17 @@
 import 'package:attendo/core/network/api_error.dart';
 import 'package:attendo/core/network/api_exceptions.dart';
 import 'package:attendo/core/network/api_service.dart';
+import 'package:attendo/features/auth/data/attendance_model.dart';
 import 'package:dio/dio.dart';
-class QrRepo {
+class AttendanceRepo {
   ApiService apiService = ApiService();
-  Future<String?> getQrData() async {
+  Future<AttendanceModel?> getAttendance() async {
     try {
-      final response = await apiService.get('/api/employee/qr'); // غيري الـ endpoint على حسب الـ backend
-
+      final response = await apiService.get('/api/attendance/report');
       if (response is Map<String, dynamic>) {
-        return response['qrData']?.toString(); // غيري الـ key على حسب رد السيرفر
+        return AttendanceModel.fromJson(response);
       } else {
-        throw ApiError(message: 'Unexpected response');
+        throw ApiError(message: 'Unexpected Error');
       }
     } on DioException catch (e) {
       throw ApiExceptions.handleError(e);

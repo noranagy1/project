@@ -1,4 +1,5 @@
 import 'package:attendo/core/appStyle.dart';
+import 'package:attendo/core/extensions.dart';
 import 'package:attendo/core/reusable_components/customSnackBar.dart';
 import 'package:attendo/core/utils/pref_helpers.dart';
 import 'package:attendo/features/auth/data/auth_repo.dart';
@@ -23,7 +24,7 @@ class _ProfileMenuDialogState extends State<ProfileMenuDialog> {
   Future<void> getProfile() async {
     try {
       final token = await PrefHelper.getToken();
-      print('Token in getProfile: $token'); // شوفي الـ token موجود ولا لأ
+      print('Token in getProfile: $token');
       final data = await authRepo.getProfile();
       if (!mounted) return;
       setState(() => user = data);
@@ -45,9 +46,9 @@ class _ProfileMenuDialogState extends State<ProfileMenuDialog> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-          customSnack('Logout failed: ${e.toString()}'));
+          customSnack('context.l10n.logout_failed: ${e.toString()}'));
     }
-  }  String notificationValue = "Allow";
+  }  late String notificationValue = context.l10n.allow;
   @override
   Widget build(BuildContext context) {
     return  Dialog(
@@ -67,7 +68,7 @@ class _ProfileMenuDialogState extends State<ProfileMenuDialog> {
                 CircleAvatar(
                   radius: 35,
                   backgroundColor: Color(0xFFDDF4FD).withOpacity(0.2),
-                  child: const Icon(
+                  child: Icon(
                     Icons.person_4_rounded,
                     size: 60,
                     color:Color(0xFFDDF4FD),
@@ -79,7 +80,7 @@ class _ProfileMenuDialogState extends State<ProfileMenuDialog> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        user?.name ?? 'Loading...',
+                        user?.name ?? context.l10n.loading,
                         style: TextStyle(
                           fontSize: 15,
                           color: Colors.grey.shade700,
@@ -87,7 +88,7 @@ class _ProfileMenuDialogState extends State<ProfileMenuDialog> {
                       ),
                       SizedBox(height: 1),
                       Text(
-                        user?.email ?? 'Loading...',
+                        user?.email ?? context.l10n.loading,
                         style: TextStyle(
                           color: Colors.grey,
                         ),
@@ -95,18 +96,18 @@ class _ProfileMenuDialogState extends State<ProfileMenuDialog> {
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right),
+                Icon(Icons.chevron_right),
               ],
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
             Divider(color: Colors.grey.shade300),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             /// ===== My Profile =====
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.person_4_outlined),
-              title: const Text("My Profile"),
-              trailing: const Icon(Icons.chevron_right),
+              leading: Icon(Icons.person_4_outlined),
+              title: Text(context.l10n.my_profile),
+              trailing: Icon(Icons.chevron_right),
               onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileEdit(),
                 ),
@@ -116,9 +117,9 @@ class _ProfileMenuDialogState extends State<ProfileMenuDialog> {
             /// ===== Settings =====
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.settings_outlined),
-              title: const Text("Settings"),
-              trailing: const Icon(Icons.chevron_right),
+              leading: Icon(Icons.settings_outlined),
+              title: Text(context.l10n.settings),
+              trailing: Icon(Icons.chevron_right),
               onTap: () {
                 showDialog(
                   context: context,
@@ -129,11 +130,11 @@ class _ProfileMenuDialogState extends State<ProfileMenuDialog> {
             /// ===== Notification =====
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.notifications_none),
-              title: const Text("Notification"),
+              leading: Icon(Icons.notifications_none),
+              title: Text(context.l10n.notification),
               trailing: Text(
-                notificationValue,
-                style: const TextStyle(color: Colors.grey),
+                notificationValue == "Allow" ? context.l10n.allow : context.l10n.mute,
+                style: TextStyle(color: Colors.grey),
               ),
               onTap: () async {
                 final result = await showDialog(
@@ -152,8 +153,8 @@ class _ProfileMenuDialogState extends State<ProfileMenuDialog> {
             /// ===== Logout =====
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.logout_rounded),
-              title: const Text("Log Out"),
+              leading: Icon(Icons.logout_rounded),
+              title: Text(context.l10n.logout),
               onTap: () {
                 logout();
               },

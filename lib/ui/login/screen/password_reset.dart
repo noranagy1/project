@@ -1,4 +1,5 @@
 import 'package:attendo/core/appStyle.dart';
+import 'package:attendo/core/extensions.dart';
 import 'package:attendo/core/reusable_components/customButton.dart';
 import 'package:attendo/ui/login/screen/set_password.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +51,7 @@ class _PasswordResetState extends State<PasswordReset> {
                   ),
                   SizedBox(height: 30),
                   Text(
-                    'Password reset',
+                    context.l10n.password_reset,
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w600,
@@ -59,7 +60,7 @@ class _PasswordResetState extends State<PasswordReset> {
                   ),
                   SizedBox(height: 15),
                   Text(
-                    'Your password has been successfully reset. click confirm to set a new password',
+                    context.l10n.password_reset_msg,
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey.shade600,
@@ -77,7 +78,7 @@ class _PasswordResetState extends State<PasswordReset> {
                       },
                       buttonColor: Color(0xFF3870E4),
                       text:
-                      'Confirm',
+                      context.l10n.confirm,
                     ),
                   ),
                 ],

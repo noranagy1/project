@@ -1,16 +1,14 @@
 import 'package:attendo/core/appStyle.dart';
+import 'package:attendo/core/extensions.dart';
 import 'package:flutter/material.dart';
-
 class NotificationDialog extends StatefulWidget {
   final String currentValue;
-
   const NotificationDialog({super.key, required this.currentValue});
-
   @override
   State<NotificationDialog> createState() => _NotificationDialogState();
 }
-
 class _NotificationDialogState extends State<NotificationDialog> {
+  String notificationValue = "Allow";
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -26,39 +24,37 @@ class _NotificationDialogState extends State<NotificationDialog> {
           /// Allow
           InkWell(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-            onTap: () => Navigator.pop(context, "Allow"),
+            onTap: () => Navigator.pop(context, context.l10n.allow),
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 14),
               alignment: Alignment.center,
               child: Text(
-                "Allow",
+                context.l10n.allow,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: widget.currentValue == "Allow"
+                  color: widget.currentValue == context.l10n.allow
                       ? Colors.blue
                       : Colors.grey.shade700,
                 ),
               ),
             ),
           ),
-
-          const Divider(height: 1),
-
+          Divider(height: 1),
           /// Mute
           InkWell(
             borderRadius:
             const BorderRadius.vertical(bottom: Radius.circular(16)),
-            onTap: () => Navigator.pop(context, "Mute"),
+            onTap: () => Navigator.pop(context, context.l10n.mute),
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 14),
               alignment: Alignment.center,
               child: Text(
-                "Mute",
+                context.l10n.mute,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: widget.currentValue == "Mute"
+                  color: widget.currentValue == context.l10n.mute
                       ? Colors.blue
                       : Colors.grey.shade700,
                 ),
