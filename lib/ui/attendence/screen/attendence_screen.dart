@@ -1,181 +1,206 @@
-import 'package:attendo/core/appStyle.dart';
-import 'package:attendo/features/auth/data/attendance_model.dart';
-import 'package:attendo/features/auth/data/attendance_repo.dart';
+import 'package:attendo/core/color_manager.dart';
+import 'package:attendo/features/auth/data/auth_repo.dart';
+import 'package:attendo/providers/theme_provider.dart';
+import 'package:attendo/ui/attendence/widget/attendance_model.dart';
+import 'package:attendo/ui/attendence/widget/overview_bar.dart';
+import 'package:attendo/ui/attendence/widget/report_card.dart';
+import 'package:attendo/ui/attendence/widget/weekly_section.dart';
 import 'package:flutter/material.dart';
-class AttendanceScreen extends StatefulWidget {
-  const AttendanceScreen({super.key});
+import 'package:provider/provider.dart';
+// ─────────────────────────────────────────
+//  REPORT SCREEN
+// ─────────────────────────────────────────
+class ReportScreen extends StatefulWidget {
+   const ReportScreen({super.key});
   @override
-  State<AttendanceScreen> createState() => _AttendanceScreenState();
+  State<ReportScreen> createState() => _ReportScreenState();
 }
-class _AttendanceScreenState extends State<AttendanceScreen> {
-  final AttendanceRepo _repo = AttendanceRepo();
-  AttendanceModel? attendance;
-  bool isLoading = true;
+class _ReportScreenState extends State<ReportScreen> {
+  bool _isLoading = true;
+  MonthlyReport? _report;
+  DateTime _selectedMonth = DateTime.now();
+  AuthRepo authRepo = AuthRepo();
   @override
   void initState() {
     super.initState();
-    getAttendance();
+    _fetchReport();
   }
-  Future<void> getAttendance() async {
+  // ── Fetch from API via Repo ───────────
+  Future<void> _fetchReport() async {
+    setState(() => _isLoading = true);
     try {
-      final data = await _repo.getAttendance();
-      if (!mounted) return;
-      setState(() {
-        attendance = data;
-        isLoading = false;
-      });
+      final report = await authRepo.getMonthlyReport();
+      setState(() => _report = report);
     } catch (e) {
-      setState(() => isLoading = false);
-      print(e);
+      debugPrint('Error fetching report: $e');
+      setState(() => _report = null);
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
-  String formatTime(String? isoDate) {
-    if (isoDate == null) return '--:--';
-    final dt = DateTime.parse(isoDate).toLocal();
-    final hour = dt.hour.toString().padLeft(2, '0');
-    final min = dt.minute.toString().padLeft(2, '0');
-    return '$hour:$min';
-  }
-  Color statusColor(String status) {
-    switch (status) {
-      case 'Late': return Colors.orange;
-      case 'Present': return Colors.green;
-      case 'Absent': return Colors.red;
-      default: return Colors.grey;
+  // ── Month picker ──────────────────────
+  Future<void> _pickMonth() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedMonth,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+      initialDatePickerMode: DatePickerMode.year,
+    );
+    if (picked != null) {
+      setState(() => _selectedMonth = picked);
+      _fetchReport();
     }
+  }
+  String get _monthLabel {
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return '${months[_selectedMonth.month - 1]} ${_selectedMonth.year}';
   }
   @override
   Widget build(BuildContext context) {
+    final isDark = Provider.of<ThemeProvider>(context).isDark;
     return Scaffold(
-      backgroundColor: AppStyle.lightTheme.scaffoldBackgroundColor,
-      body: SafeArea(
+      backgroundColor: isDark ? ColorManager.darkBg : const Color(0xFFF1F5F9),
+      body: Column(
+        children: [
+          // ── Gradient Header ───────────
+          _buildHeader(),
+          // ── Content ───────────────────
+          Expanded(
+            child: _isLoading
+                ? _buildLoader()
+                : _report == null
+                ? _buildError()
+                : _buildContent(),
+          ),
+        ],
+      ),
+    );
+  }
+  // ── Header ────────────────────────────
+  Widget _buildHeader() {
+    final isDark = Provider.of<ThemeProvider>(context).isDark;
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDark
+              ? [const Color(0xFF1E3A5F), ColorManager.darkBg]
+              : [const Color(0xFF1E3A5F), ColorManager.blueDark],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-              horizontal: 30, vertical: 30),
+          padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// Back Button
-              Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFFECECEC),
-                  shape: BoxShape.circle,
-                ),
-                child: IconButton(
-                  icon: Icon(Icons.arrow_back_ios_new, size: 25),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Attendance Report',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 20),
-
-              if (isLoading)
-                Center(child: CircularProgressIndicator())
-              else if (attendance == null)
-                Center(child: Text('No data found'))
-              else ...[
-                  /// Summary Cards
-                  Row(
-                    children: [
-                      _summaryCard('Present', attendance!.presentDays, Colors.green),
-                      SizedBox(width: 10),
-                      _summaryCard('Late', attendance!.lateDays, Colors.orange),
-                      SizedBox(width: 10),
-                      _summaryCard('Absent', attendance!.absentDays, Colors.red),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-
-                  /// Details List
-                  Text('Details', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 10),
-                  Expanded(
-                    child: attendance!.details.isEmpty
-                        ? Center(child: Text('No records found'))
-                        : ListView.builder(
-                      itemCount: attendance!.details.length,
-                      itemBuilder: (context, index) {
-                        final date = attendance!.details.keys.elementAt(index);
-                        final day = attendance!.details[date]!;
-                        return Container(
-                          margin: EdgeInsets.only(bottom: 12),
-                          padding: EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 8,
-                                offset: Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(date, style: TextStyle(fontWeight: FontWeight.bold)),
-                                  SizedBox(height: 6),
-                                  Text('Check In: ${formatTime(day.checkIn)}',
-                                      style: TextStyle(color: Colors.grey)),
-                                  Text('Check Out: ${formatTime(day.checkOut)}',
-                                      style: TextStyle(color: Colors.grey)),
-                                ],
-                              ),
-                              Container(
-                                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: statusColor(day.status).withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  day.status,
-                                  style: TextStyle(
-                                    color: statusColor(day.status),
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+              // Title row
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      width: 34, height: 34,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.chevron_left_rounded, color: Colors.white, size: 22),
                     ),
                   ),
+                  const Expanded(
+                    child: Text(
+                      'Attendance Report',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w800),
+                    ),
+                  ),
+                  const SizedBox(width: 34),
                 ],
+              ),
+              const SizedBox(height: 14),
+              // Month picker
+              GestureDetector(
+                onTap: _pickMonth,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.white.withOpacity(0.2)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.calendar_month_rounded, color: Colors.white70, size: 18),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          _monthLabel,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white60, size: 20),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
       ),
     );
   }
-  Widget _summaryCard(String title, int count, Color color) {
-    return Expanded(
-      child: Container(
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withOpacity(0.3)),
-        ),
+  // ── Content ───────────────────────────
+  Widget _buildContent() {
+    final isDark = Provider.of<ThemeProvider>(context).isDark;
+    final report = _report!;
+    return RefreshIndicator(
+      onRefresh: _fetchReport,
+      color: ColorManager.blue,
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Text(
-              count.toString(),
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color),
-            ),
-            SizedBox(height: 4),
-            Text(title, style: TextStyle(color: color, fontSize: 13)),
+            // Summary cards
+            ReportSummaryCards(summary: report.summary, isDark: isDark),
+            const SizedBox(height: 14),
+            // Overview bar
+            ReportOverviewBar(summary: report.summary, isDark: isDark),
+            const SizedBox(height: 14),
+            // Week sections
+            ...report.weekGroups.map((week) => Padding(
+              padding: const EdgeInsets.only(bottom: 14),
+              child: ReportWeekSection(week: week, isDark: isDark),
+            )),
+            const SizedBox(height: 8),
           ],
         ),
       ),
     );
   }
+  Widget _buildLoader() => const Center(
+    child: CircularProgressIndicator(color: ColorManager.blue),
+  );
+  Widget _buildError() {
+    final isDark = Provider.of<ThemeProvider>(context).isDark;
+    return Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text('⚠️', style: TextStyle(fontSize: 40)),
+        const SizedBox(height: 12),
+        Text('Failed to load report', style: TextStyle(color: isDark ? ColorManager.darkTextSecond : ColorManager.lightTextSecond)),
+        const SizedBox(height: 16),
+        TextButton(onPressed: _fetchReport, child: const Text('Try Again')),
+      ],
+    ),
+  );
+}
 }

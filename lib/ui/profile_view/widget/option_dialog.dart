@@ -1,4 +1,4 @@
-import 'package:attendo/core/appStyle.dart';
+import 'package:attendo/core/color_manager.dart';
 import 'package:flutter/material.dart';
 class OptionDialog extends StatelessWidget {
   final String title;
@@ -16,7 +16,7 @@ class OptionDialog extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
-      backgroundColor: AppStyle.lightTheme.scaffoldBackgroundColor,
+      backgroundColor: ColorManager.lightBg,
       contentPadding: EdgeInsets.zero,
       content: Column(
         mainAxisSize: MainAxisSize.min,

@@ -1,45 +1,40 @@
-import 'package:attendo/core/appStyle.dart';
+import 'package:attendo/core/color_manager.dart';
 import 'package:attendo/core/extensions.dart';
 import 'package:attendo/core/network/api_error.dart';
+import 'package:attendo/features/auth/auth_logo.dart';
+import 'package:attendo/features/auth/auth_switcher.dart';
+import 'package:attendo/features/auth/auth_title.dart';
+import 'package:attendo/core/reusable_components/customButton.dart';
 import 'package:attendo/core/reusable_components/customSnackBar.dart';
+import 'package:attendo/providers/theme_provider.dart';
 import 'package:attendo/features/auth/data/auth_repo.dart';
-import 'package:attendo/ui/employee/screen/employee_screen.dart';
-import 'package:attendo/ui/login/screen/forget_password.dart';
+import 'package:attendo/ui/login/widget/forget_password.dart';
 import 'package:attendo/ui/register/screen/register_screen.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:attendo/ui/security/screen/security_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:attendo/core/constants.dart';
 import 'package:attendo/core/reusable_components/customField.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:attendo/core/utils/controller_mixin.dart';
 class LoginScreen extends StatefulWidget {
   final bool showLogoutMessage;
-  const LoginScreen({super.key, this.showLogoutMessage = false});
+  const LoginScreen({super.key, this.showLogoutMessage = false,});
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
-class _LoginScreenState extends State<LoginScreen> {
-  late TextEditingController emailController;
-  late TextEditingController passwordController;
+class _LoginScreenState extends State<LoginScreen> with ControllerMixin {
+  late final emailController    = ctrl();
+  late final passwordController = ctrl();
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   @override
   void initState() {
     super.initState();
-    emailController = TextEditingController();
-    passwordController = TextEditingController();
     if (widget.showLogoutMessage) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ScaffoldMessenger.of(context).showSnackBar(
             customSnack(context.l10n.logout_successfully));
       });
     }
-  }
-  @override
-  void dispose() {
-    super.dispose();
-    emailController.dispose();
-    passwordController.dispose();
   }
   bool isLoading = false;
   AuthRepo authRepo = AuthRepo();
@@ -56,10 +51,11 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       if (!mounted) return;
       if (user != null) {
-        ScaffoldMessenger.of(context).showSnackBar(customSnack(context.l10n.login_success));
+        ScaffoldMessenger.of(context).showSnackBar(
+            customSnack(context.l10n.login_success));
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => EmployeeScreen()),
+          MaterialPageRoute(builder: (context) => SecurityScreen()),
         );
       } else {
         setState(() => isLoading = false);
@@ -76,152 +72,118 @@ class _LoginScreenState extends State<LoginScreen> {
   }
   @override
   Widget build(BuildContext context) {
+    final isDark = Provider.of<ThemeProvider>(context).isDark;
     return Scaffold(
-      backgroundColor: AppStyle.lightTheme.scaffoldBackgroundColor,
+      backgroundColor: isDark
+          ? ColorManager.darkBg
+          : ColorManager.lightBg,
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: 60,
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 28,
+            vertical: 30,
           ),
-          child: SingleChildScrollView(
-            child: Form(
-              key: formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Gap(20),
-                  Image.asset(
-                    'assets/images/gate.png',
-                    height: 200,
-                    fit: BoxFit.fitHeight,
-                  ),
-                  Text(
-                    context.l10n.get_started,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  Gap(8),
-                  Text(
-                    context.l10n.create_or_login,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey),
-                  ),
-                  Gap(20),
-                  CupertinoSlidingSegmentedControl<String>(
-                    groupValue: selectedTab,
-                    children: {
-                      'login': Padding(
-                        padding: EdgeInsets.all(8),
-                        child: Text(context.l10n.log_in),
-                      ),
-                      'register': Padding(
-                        padding: EdgeInsets.all(8),
-                        child: Text(context.l10n.sign_up),
-                      ),
-                    },
-                    onValueChanged: (value) {
-                      if (value == 'register') {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => RegisterScreen()),
-                        );
-                      } else {
-                        setState(() => selectedTab = value!);
-                      }
-                    },
-                  ),
-                  Gap(30),
-                  Customfield(
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return context.l10n.shouldnt_be_empty;
-                      }
-                      if (!RegExp(emailRegex).hasMatch(value)) {
-                        return context.l10n.invalid_email;
-                      }
-                      return null;
-                    },
-                    label: context.l10n.email,
-                    controller: emailController,
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  Gap(25),
-                  Customfield(
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return context.l10n.shouldnt_be_empty;
-                      }
-                      if (value.length < 6) {
-                        return context.l10n.password_min;
-                      }
-                      return null;
-                    },
-                    label: context.l10n.password,
-                    controller: passwordController,
-                    keyboardType: TextInputType.visiblePassword,
-                    isObscured: true,
-                  ),
-                  Gap(1),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ForgetPassword()),
-                        );
-                      },
-                      child: Text(
-                        context.l10n.forgot_password_q,
-                        style: TextStyle(
-                          color: Color(0xFF1D61E7),
-                        ),
-                      ),
-                    ),
-                  ),
-                  isLoading
-                      ? CupertinoActivityIndicator(color: Colors.white)
-                      : SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFF3870E4),
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 17,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                side: BorderSide(
-                                  width: 1,
-                                  color: Color(0xFF3870E4),
-                                ),
-                              ),
+          child: Form(
+            key: formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 36),
+                // ── Logo ─────────────────
+                AuthLogo(isDark: isDark),
+                const SizedBox(height: 28),
+                // ── Title ────────────────
+                AuthTitle(
+                  isDark: isDark,
+                  title: 'Welcome Back 👋',
+                  subtitle: 'Sign in to access your dashboard',
+                ),
+                const SizedBox(height: 28),
+                // ── Tab switcher ──────────
+                AuthTabSwitcher(
+                  isLogin: true,
+                  isDark: isDark,
+                  onChanged: (isLogin) {
+                    if (!isLogin) {
+                      (
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => RegisterScreen(),
                             ),
-                            onPressed: () {
-                              login();
-                            },
-                            child: Text(
-                              context.l10n.login,
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                ],
-              ),
+                          )
+                      );
+                    }
+                  },
+                ),
+                const SizedBox(height: 22),
+                // ── Fields ───────────────
+                AuthInputField(
+                  label: context.l10n.email,
+                  controller: emailController,
+                  isDark: isDark,
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return context.l10n.shouldnt_be_empty;
+                    }
+                    if (!RegExp(emailRegex).hasMatch(value)) {
+                      return context.l10n.invalid_email;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 14),
+                AuthInputField(
+                  label: context.l10n.password,
+                  controller: passwordController,
+                  isDark: isDark,
+                  isPassword: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return context.l10n.shouldnt_be_empty;
+                    }
+                    if (value.length < 6) {
+                      return context.l10n.password_min;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 10),
+                // ── Forgot password ───────
+                _buildForgotPassword(),
+                const SizedBox(height: 28),
+                // ── Login button ──────────
+                AuthButton(
+                  label: context.l10n.login,
+                  onTap: login,
+                  isLoading: isLoading,
+                ),
+                const SizedBox(height: 32),
+              ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+  Widget _buildForgotPassword() {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ForgotPasswordScreen()),
+          );
+        },
+        child: Text(
+        context.l10n.forgot_password_q,
+          style: TextStyle(
+            color: ColorManager.blue,
+            fontSize: 12.5,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),

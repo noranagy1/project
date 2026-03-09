@@ -1,81 +1,152 @@
+import 'package:attendo/core/color_manager.dart';
 import 'package:flutter/material.dart';
-class Customfield extends StatefulWidget {
-  String? label;
-  String? hint;
-  int? lines;
-  TextEditingController controller;
-  TextInputType keyboardType;
-  bool isObscured;
+class AuthInputField extends StatefulWidget {
+  final String label;
+  final String? hint;
+  final TextEditingController controller;
+  final bool isDark;
   String? Function(String?) validator; /// ال validator عبارة عن function بتاخد النص اللي اتكتب ولو فيه خطأ بترجع رسالة خطأ، ولو صح بترجع null
-  Customfield({
-    this.lines,
-     this.label,
-    this.hint,
-    required this.validator,
+  final bool isPassword;
+  final TextInputType? keyboardType;
+  AuthInputField({
     super.key,
-    this.isObscured = false,
-    required this.keyboardType,
+    required this.label,
+     this.hint,
     required this.controller,
+    required this.isDark,
+    this.isPassword = false,
+    this.keyboardType,
+    required this.validator,
   });
   @override
-  State<Customfield> createState() => _CustomfieldState();
+  State<AuthInputField> createState() => _AuthInputFieldState();
 }
-class _CustomfieldState extends State<Customfield> {
-  bool passwordToggle = true;
+class _AuthInputFieldState extends State<AuthInputField> {
+  bool _obscure = true;
+  bool _focused = false;
+  late final FocusNode _focusNode;
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode()
+      ..addListener(() {
+        setState(() => _focused = _focusNode.hasFocus);
+      });
+  }
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      validator: widget.validator,
-      controller: widget.controller,
-      keyboardType: widget.keyboardType,
-      autovalidateMode: AutovalidateMode.onUserInteraction, /// السطر ده بيخلي التحقق يظهر بعد ما المستخدم يبدأ يكتب في الحقل
-      obscureText: widget.isObscured ? passwordToggle : false,
-      maxLines: widget.isObscured == true ? 1 : widget.lines ?? 1,
-      cursorHeight: 20,
-      decoration: InputDecoration(
-        fillColor:  Colors.white,
-        filled: true,
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 15,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            width: 1,
-            color: Colors.grey,
+    final borderColor = _focused
+        ? ColorManager.blue.withOpacity(0.5)
+        : (widget.isDark
+        ? Colors.white.withOpacity(0.08)
+        : ColorManager.lightBorder);
+    final fillColor = widget.isDark
+        ? Colors.white.withOpacity(0.04)
+        : const Color(0xFFF8FAFC);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // ── Label ──────────────────────
+        Text(
+          widget.label,
+          style: TextStyle(
+            color: widget.isDark
+                ? ColorManager.darkTextSecond
+                : ColorManager.lightTextMuted,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.3,
           ),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
-            color: Colors.blue,
+        SizedBox(height: 6),
+        // ── Input ──────────────────────
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: _focused
+                ? [
+              BoxShadow(
+                color: ColorManager.blue.withOpacity(
+                    widget.isDark ? 0.1 : 0.08),
+                blurRadius: 0,
+                spreadRadius: 3,
+              ),
+            ]
+                : [],
+          ),
+          child: TextFormField(
+            controller: widget.controller,
+            validator: widget.validator,
+            autovalidateMode: AutovalidateMode.onUserInteraction, /// السطر ده بيخلي التحقق يظهر بعد ما المستخدم يبدأ يكتب في الحقل
+            focusNode: _focusNode,
+            obscureText: widget.isPassword && _obscure,
+            keyboardType: widget.keyboardType,
+            style: TextStyle(
+              color: widget.isDark
+                  ? ColorManager.darkTextPrimary
+                  : ColorManager.lightTextPrimary,
+              fontSize: 13.5,
+            ),
+            decoration: InputDecoration(
+              hintText: widget.hint,
+              hintStyle: TextStyle(
+                color: widget.isDark
+                    ? ColorManager.darkTextSecond
+                    : const Color(0xFF94A3B8),
+                fontSize: 13.5,
+              ),
+              filled: true,
+              fillColor: fillColor,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 14,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: borderColor, width: 1.5),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: widget.isDark
+                      ? Colors.white.withOpacity(0.08)
+                      : ColorManager.lightBorder,
+                  width: 1.5,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: ColorManager.blue.withOpacity(0.5),
+                  width: 1.5,
+                ),
+              ),
+              // Eye icon لو password
+              suffixIcon: widget.isPassword
+                  ? IconButton(
+                onPressed: () =>
+                    setState(() => _obscure = !_obscure),
+                icon: Icon(
+                  _obscure
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                  size: 20,
+                  color: widget.isDark
+                      ? ColorManager.darkIconMuted
+                      : ColorManager.lightIconMuted,
+                ),
+              )
+                  : null,
+            ),
           ),
         ),
-        labelText: widget.label,
-        hintText: widget.hint,
-        floatingLabelBehavior: FloatingLabelBehavior.always,
-        labelStyle: TextStyle(
-          color: Colors.grey,
-          fontSize: 15,
-          fontWeight: FontWeight.w400,
-        ),
-        suffixIcon: widget.isObscured ? IconButton( /// ده شرط بيقرر يظهر العين ولا لأ
-          icon: Icon(
-            color: Colors.grey,
-            passwordToggle
-                ?Icons.visibility_rounded
-                :Icons.visibility_off_rounded, /// شكل العين بيتغير حسب حالة الباسورد
-          ),
-          onPressed: () {
-            setState(() {
-              passwordToggle = ! passwordToggle; /// ! معناها اعكس القيمة
-              /// اول حاجة بيبقى الباسورد مخفى لو دوست على العين بيتغير ويبقى واضح لان ! بتغير لو هو صح بتخليه غلط والعكس
-            });
-          },
-          color: Colors.grey.shade900,
-        ):null,
-      ),
+      ],
     );
   }
 }

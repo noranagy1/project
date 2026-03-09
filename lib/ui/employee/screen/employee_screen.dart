@@ -1,15 +1,19 @@
-import 'package:attendo/core/appStyle.dart';
 import 'package:attendo/core/color_manager.dart';
 import 'package:attendo/core/extensions.dart';
 import 'package:attendo/core/reusable_components/box.dart';
+import 'package:attendo/core/reusable_components/labeled_divider.dart';
 import 'package:attendo/core/reusable_components/submit_complaint.dart';
+import 'package:attendo/core/reusable_components/top_bar.dart';
 import 'package:attendo/core/utils/pref_helpers.dart';
 import 'package:attendo/features/auth/data/auth_repo.dart';
 import 'package:attendo/features/auth/data/user_model.dart';
+import 'package:attendo/providers/theme_provider.dart';
 import 'package:attendo/ui/QR/screen/qr_screen.dart';
+import 'package:attendo/ui/attendence/screen/attendence_screen.dart';
 import 'package:attendo/ui/profile_view/screen/profile_header.dart';
-import 'package:attendo/ui/profile_view/screen/profile_menu_dialog.dart';
+import 'package:attendo/ui/profile_view/widget/profile_menu_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 class EmployeeScreen extends StatefulWidget {
   const EmployeeScreen({super.key});
   @override
@@ -34,126 +38,119 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
       print(e);
     }
   }
+  // ── Section label ──────────────────────
   @override
   Widget build(BuildContext context) {
-    return ScrollConfiguration(
-      behavior: ScrollConfiguration.of(context).copyWith(
-        overscroll: false,
-      ),
-      child: Scaffold(
-        backgroundColor: AppStyle.lightTheme.scaffoldBackgroundColor,
-        body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 30,
-                  vertical: 15,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    final _isDark = Provider.of<ThemeProvider>(context).isDark;
+    return Scaffold(
+      backgroundColor: _isDark ? ColorManager.darkBg : ColorManager.lightBg,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // ── Top Bar ──────────────────
+            AppTopBar(),
+            // ── Divider ──────────────────
+            Divider(
+              color: _isDark ? ColorManager.darkDivider : ColorManager.lightDivider,
+              thickness: 1, height: 1,
+              indent: 20, endIndent: 20,
+            ),
+            // ── Scrollable ───────────────
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(20, 14, 20, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    InkWell(
-                      child: Image.asset(
-                        'assets/images/gate.png',
-                        height: 100,
-                      ),
-                      borderRadius: BorderRadius.circular(40),
+                    // ── Profile Header ────
+                    ProfileHeader(
+                      name: user?.name ?? context.l10n.loading,
+                      email: user?.email ?? context.l10n.loading,
+                      isDark: _isDark,
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          barrierColor: Colors.black.withOpacity(0.4),
+                          builder: (context) {
+                            return MenuBottomSheet();
+                          },
+                        );
+                        getProfile();
+                      },
                     ),
-                    InkWell(
-                      child: Icon(
-                        Icons.more_vert_outlined,
-                        size: 45,
-                        color: Colors.blue,
-                      ),
-                      borderRadius: BorderRadius.circular(40),
+                    const SizedBox(height: 40),
+                    // ── Section label ─────
+                    LabeledDivider(text: 'الخدمات', isDark: _isDark),
+                    // ── Main cards (larger) ─
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SmallBox(
+                            type: SmallBoxType.attendanceQr,
+                            isDark: _isDark,
+                            size: SmallBoxSize.large,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => QrScreen(),
+                                ));
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: SmallBox(
+                            type: SmallBoxType.report,
+                            isDark: _isDark,
+                            size: SmallBoxSize.large,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ReportScreen(),
+                                ));
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    // ── Secondary cards (smaller) ─
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SmallBox(
+                            type: SmallBoxType.complaint,
+                            isDark: _isDark,
+                            size: SmallBoxSize.small,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ComplaintScreen(),
+                                ));
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: SmallBox(
+                            type: SmallBoxType.vehicleReport,
+                            isDark: _isDark,
+                            size: SmallBoxSize.small,
+                            onTap: () {
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 30,
-                ),
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 30,
-                    vertical: 30,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Color(0xFF4894FE),
-                    borderRadius: BorderRadius.circular(25),
-                    boxShadow: [
-                      BoxShadow(
-                          color: ColorManager.gradientEnd.withOpacity(0.9999),
-                          blurRadius: 15,
-                          spreadRadius: 0,
-                          offset: Offset(0, 5)
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      ProfileHeader(
-                        name: user?.name ?? context.l10n.loading,
-                        email: user?.email ?? context.l10n.loading,
-                        onTap: () async {
-                         await showDialog(
-                            context: context,
-                            barrierColor: Colors.black.withOpacity(0.4),
-                            builder: (context) {
-                              return ProfileMenuDialog();
-                            },
-                          );
-                          getProfile();
-                        },
-                      ),
-                      SizedBox(height: 15),
-                      Container(
-                        width: double.infinity,
-                        height: 1,
-                        color: Color(0x26FFFFFF),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.all(20.0),
-                  child: GridView.count(
-                      shrinkWrap: true,
-                      physics: BouncingScrollPhysics(),
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                      childAspectRatio: 0.70,
-                      children: [
-                        Box(
-                          imagePath: "assets/images/qr.png",
-                          imageColor: Color(0xFF082859),
-                          title: context.l10n.attendance,
-                        ),
-                        Box(
-                          imagePath: "assets/images/report.png",
-                          title: context.l10n.attendance_report,
-                        ),
-                        Box(
-                          imagePath: "assets/images/status.png",
-                          title: context.l10n.vehicle_report,
-                        ),
-                        Box(
-                          imagePath: "assets/images/complaint.png",
-                          title: context.l10n.submit_complaint,
-                        ),
-                      ]
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

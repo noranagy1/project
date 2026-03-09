@@ -11,9 +11,6 @@ class ApiExceptions{
             statusCode: statusCode);
       }
     }
-    print(statusCode);
-    print(data);
-    print(error.type);
     print(error.message);
     print(error.response);
     if (error is DioException) {

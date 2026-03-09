@@ -1,4 +1,4 @@
-import 'package:attendo/core/appStyle.dart';
+import 'package:attendo/core/color_manager.dart';
 import 'package:attendo/core/extensions.dart';
 import 'package:flutter/material.dart';
 class NotificationDialog extends StatefulWidget {
@@ -11,12 +11,13 @@ class _NotificationDialogState extends State<NotificationDialog> {
   String notificationValue = "Allow";
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return AlertDialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 120), // 👈 بيصغّر العرض
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
-      backgroundColor: AppStyle.lightTheme.scaffoldBackgroundColor,
+      backgroundColor: isDark ? ColorManager.darkCard : Colors.white,
       contentPadding: EdgeInsets.zero,
       content: Column(
         mainAxisSize: MainAxisSize.min,

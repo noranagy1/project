@@ -3,6 +3,7 @@ import 'package:attendo/core/network/api_exceptions.dart';
 import 'package:attendo/core/network/api_service.dart';
 import 'package:attendo/core/utils/pref_helpers.dart';
 import 'package:attendo/features/auth/data/user_model.dart';
+import 'package:attendo/ui/attendence/widget/attendance_model.dart';
 import 'package:dio/dio.dart';
 class AuthRepo {
   ApiService apiService = ApiService();
@@ -45,8 +46,7 @@ class AuthRepo {
     }
   }
   /// register
-  Future<UserModel?> register(String name, String email, String password,
-      String role) async {
+  Future<UserModel?> register(String name, String email, String password, String role) async {
     try {
       final response = await apiService.post('/api/auth/signup', {
         'name': name,
@@ -54,20 +54,17 @@ class AuthRepo {
         'password': password,
         'role': role,
       });
-      if (response is ApiError) {
-        throw response;
-      }
+      if (response is ApiError) throw response;
       if (response is Map<String, dynamic>) {
-        final msg = response['message']?.toString();
-        final code = response['code'];
-        final coder =
-        code is int ? code : int.tryParse(code?.toString() ?? '0') ?? 0;
-        if (coder != 200 && coder != 201) {
-          throw ApiError(message: msg?.toString() ?? "Unknown Error");
+        final token = response['token']?.toString();
+        final employeeData = response['employee'] as Map<String, dynamic>?;
+        if (employeeData == null) {
+          throw ApiError(message: 'Unexpected Error from server');
         }
-        final user = UserModel.fromJson(response['data']);
-        if (user.token != null) {
-          await PrefHelper.saveToken(user.token!);
+        employeeData['token'] = token;
+        final user = UserModel.fromJson(employeeData);
+        if (token != null) {
+          await PrefHelper.saveToken(token);
         }
         return user;
       } else {
@@ -78,8 +75,7 @@ class AuthRepo {
     } catch (e) {
       throw ApiError(message: e.toString());
     }
-  }
-  /// log out
+  }  /// log out
   Future<void> logout() async {
     String? token = await PrefHelper.getToken();
     if (token == null) throw ApiError(message: "No token found");
@@ -128,4 +124,122 @@ class AuthRepo {
       throw ApiError(message: e.toString());
     }
   }
+  ///QR
+  Future<String?> getQrData() async {
+    try {
+      final response = await apiService.get('/api/qr/my-qr'); // غيري الـ endpoint على حسب الـ backend
+
+      if (response is Map<String, dynamic>) {
+        return response['qrData']?.toString(); // غيري الـ key على حسب رد السيرفر
+      } else {
+        throw ApiError(message: 'Unexpected response');
+      }
+    } on DioException catch (e) {
+      throw ApiExceptions.handleError(e);
+    } catch (e) {
+      throw ApiError(message: e.toString());
+    }
+  }
+  /// Attendance
+  Future<MonthlyReport> getMonthlyReport() async {
+    try {
+      final response = await apiService.get('/api/attendance/report');
+      if (response is Map<String, dynamic>) {
+        return MonthlyReport.fromJson(response);
+      } else {
+        throw ApiError(message: 'Unexpected response format');
+      }
+    } on DioException catch (e) {
+      throw ApiExceptions.handleError(e);
+    } catch (e) {
+      throw ApiError(message: e.toString());
+    }
+  }
+  // ─────────────────────────────────────────
+  //  FORGOT PASSWORD FLOW  (3 steps)
+  // ─────────────────────────────────────────
+  /// Step 1 — بيبعت إيميل للمستخدم فيه OTP
+  /// بنبعت الإيميل بس، السيرفر هو اللي بيبعت الكود
+  Future<void> forgotPassword(String email) async {
+    try {
+      final response = await apiService.post(
+        '/api/auth/forgot-password',
+        {'email': email},
+      );
+      // لو السيرفر رجّع error message هنرميه
+      if (response is Map<String, dynamic>) {
+        final msg = response['message']?.toString();
+        final success = response['success'];
+        // بعض السيرفرات بترجع success: false لو الإيميل مش موجود
+        if (success == false) {
+          throw ApiError(message: msg ?? 'Email not found');
+        }
+      }
+    } on DioException catch (e) {
+      throw ApiExceptions.handleError(e);
+    } catch (e) {
+      throw ApiError(message: e.toString());
+    }
+  }
+  /// Step 2 — بيتحقق من الـ OTP اللي المستخدم كتبه
+  /// بيرجع resetToken — ده token مؤقت بنستخدمه في الـ Step 3 بس
+  Future<String> verifyOtp(String email, String code) async {
+    try {
+      final response = await apiService.post(
+        '/api/auth/verify-otp',
+        {'email': email, 'otp': code},
+      );
+      if (response is Map<String, dynamic>) {
+        // السيرفر بيرجع reset token مؤقت علشان نعمله authorize في الـ Step 3
+        final resetToken = response['resetToken']?.toString()
+            ?? response['token']?.toString();
+        if (resetToken == null || resetToken.isEmpty) {
+          throw ApiError(message: 'Invalid or expired code');
+        }
+        return resetToken;
+      }
+      throw ApiError(message: 'Unexpected response from server');
+    } on DioException catch (e) {
+      throw ApiExceptions.handleError(e);
+    } catch (e) {
+      throw ApiError(message: e.toString());
+    }
+  }
+  /// Step 3 — بيعمل reset للباسورد بالـ resetToken اللي جاء من Step 2
+  /// [resetToken] — التوكن المؤقت اللي رجع من verifyOtp
+  /// [newPassword] — الباسورد الجديد
+  /// [confirmPassword] — تأكيد الباسورد (validation على السيرفر كمان)
+  Future<void> resetPassword({
+    required String resetToken,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    try {
+      await apiService.post(
+        '/api/auth/reset-password',
+        {
+          'resetToken': resetToken,
+          'newPassword': newPassword,
+          'confirmPassword': confirmPassword,
+        },
+      );
+    } on DioException catch (e) {
+      throw ApiExceptions.handleError(e);
+    } catch (e) {
+      throw ApiError(message: e.toString());
+    }
+  }
+  Future<void> controlDevice(String type, bool status) async {
+    await apiService.post('/api/control/toggle', {
+      'device': type,   // 'camera' or 'gate'
+      'status': status, // true = on, false = off
+    });
+  }
+  Future<Map<String, dynamic>> getGateStatus() async {
+    return await apiService.get('/api/gate/status');
+  }
+  Future<dynamic> getVehicleReport() async {
+    return await apiService.get('/api/vehicles/report');
+  }
+
 }

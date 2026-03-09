@@ -1,6 +1,8 @@
+import 'package:attendo/core/color_manager.dart';
 import 'package:attendo/core/extensions.dart';
-import 'package:attendo/core/locale_provider.dart';
-import 'package:attendo/ui/profile_view/screen/option_dialog.dart';
+import 'package:attendo/providers/locale_provider.dart';
+import 'package:attendo/providers/theme_provider.dart';
+import 'package:attendo/ui/profile_view/widget/option_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 class SettingsDialog extends StatefulWidget {
@@ -8,51 +10,55 @@ class SettingsDialog extends StatefulWidget {
   @override
   State<SettingsDialog> createState() => _SettingsDialogState();
 }
+
 class _SettingsDialogState extends State<SettingsDialog> {
-  late String selectedTheme = context.l10n.light;
   String selectedLanguage = "Eng";
+
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDark = themeProvider.isDark;
+
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(25),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? ColorManager.darkCard : Colors.white,
           borderRadius: BorderRadius.circular(25),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            /// ===== Header (Settings + X) =====
+            /// Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  context.l10n.settings,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                Text(context.l10n.settings,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? ColorManager.darkTextPrimary : ColorManager.lightTextPrimary,
+                    )),
                 InkWell(
                   borderRadius: BorderRadius.circular(20),
                   onTap: () => Navigator.pop(context),
-                  child: Icon(Icons.close),
+                  child: Icon(Icons.close,
+                    color: isDark ? ColorManager.darkTextSecond : ColorManager.lightTextSecond,
+                  ),
                 ),
               ],
             ),
-             SizedBox(height: 15),
-            Divider(color: Colors.grey.shade300),
-             SizedBox(height: 10),
-            /// ===== Theme =====
+            SizedBox(height: 15),
+            Divider(color: isDark ? ColorManager.darkDivider : Colors.grey.shade300),
+            SizedBox(height: 10),
+
+            /// Theme
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(context.l10n.theme),
               trailing: Text(
-                selectedTheme,
+                isDark ? context.l10n.dark : context.l10n.light,
                 style: TextStyle(color: Colors.grey),
               ),
               onTap: () async {
@@ -60,25 +66,21 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   context: context,
                   builder: (_) => OptionDialog(
                     title: context.l10n.theme,
-                    options: [context.l10n.light, context.l10n.dark],
-                    currentValue: selectedTheme,
+                    options: ["Light", "Dark"], // ثابتين
+                    currentValue: isDark ? "Dark" : "Light",
                   ),
                 );
                 if (result != null) {
-                  setState(() {
-                    selectedTheme = result;
-                  });
+                  themeProvider.setTheme(result == "Dark");
                 }
               },
             ),
-            /// ===== Language =====
+
+            /// Language
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(context.l10n.language),
-              trailing: Text(
-                selectedLanguage,
-                style: TextStyle(color: Colors.grey),
-              ),
+              trailing: Text(selectedLanguage, style: TextStyle(color: Colors.grey)),
               onTap: () async {
                 final result = await showDialog(
                   context: context,
@@ -89,14 +91,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   ),
                 );
                 if (result != null) {
-                  setState(() {
-                    selectedLanguage = result;
-                  });
+                  setState(() => selectedLanguage = result);
                   final locale = result == "Ar" ? const Locale('ar') : const Locale('en');
                   Provider.of<LocaleProvider>(context, listen: false).setLocale(locale);
                 }
               },
-            ),          ],
+            ),
+          ],
         ),
       ),
     );

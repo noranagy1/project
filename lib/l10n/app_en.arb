@@ -42,8 +42,6 @@
   "your_email": "Your Email",
   "reset_password": "Reset Password",
   "invalid_email": "Invalid email",
-  "get_started": "Get Started now",
-  "create_or_login": "Create an account or log in to explore\nabout our app",
   "log_in": "Log In",
   "sign_up": "Sign Up",
   "forgot_password_q": "Forgot Password?",
@@ -78,7 +76,7 @@
   "registration_failed": "Registration failed",
   "error_in_register": "Error in register",
   "select_role": "Select Role",
-  "employee": "Employee",
-  "security": "Security",
+  "employee": "employee",
+  "security": "security",
   "ar": "Ar"
 }

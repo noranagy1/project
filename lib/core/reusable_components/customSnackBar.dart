@@ -1,8 +1,9 @@
+import 'package:attendo/core/color_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 /// طريقة سريعة لإظهار رسالة للمستخدم بدون تغيير الشاشة أو فتح AlertDialog
-SnackBar customSnack(errorMsg){ /// تاخد رسالة errorMsg وتعمل SnackBar جاهزة بالتصميم اللي حددناه
+SnackBar customSnack(errorMsg, {Color color = Colors.green, bool isError = false}){ /// تاخد رسالة errorMsg وتعمل SnackBar جاهزة بالتصميم اللي حددناه
 return SnackBar(
     padding: EdgeInsets.symmetric(
       horizontal: 20,
@@ -16,7 +17,7 @@ return SnackBar(
     elevation: 10,
     behavior: SnackBarBehavior.floating,
     clipBehavior: Clip.none,
-    backgroundColor: Colors.green,
+    backgroundColor: isError ? ColorManager.red : color,
     content: Row(
       children: [
         Icon(CupertinoIcons.info, color: Colors.white),
