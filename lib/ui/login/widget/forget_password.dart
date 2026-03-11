@@ -1,3 +1,4 @@
+import 'package:attendo/core/color_manager.dart';
 import 'package:attendo/core/constants.dart';
 import 'package:attendo/core/extensions.dart';
 import 'package:attendo/core/network/api_error.dart';
@@ -8,51 +9,48 @@ import 'package:attendo/core/utils/controller_mixin.dart';
 import 'package:attendo/features/auth/data/auth_repo.dart';
 import 'package:attendo/ui/login/widget/check_email.dart';
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
+import 'package:provider/provider.dart';
+import '../../../providers/theme_provider.dart';
 
-import '../../../core/color_manager.dart';
-// ─────────────────────────────────────────
-//  FORGOT PASSWORD SCREEN
-//  المستخدم يكتب الإيميل → يضغط Reset
-//  → ينتقل لـ OtpVerifyScreen
-// ─────────────────────────────────────────
 class ForgotPasswordScreen extends StatefulWidget {
-  final bool isDark;
-  const ForgotPasswordScreen({super.key, this.isDark = false});
+  const ForgotPasswordScreen({super.key});
   @override
   State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
+
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> with ControllerMixin {
   late final emailCtrl = ctrl();
   final formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   final _repo = AuthRepo();
   Future<void> _sendCode() async {
+    if (formKey.currentState?.validate() != true) return;
     setState(() => _isLoading = true);
     try {
       await _repo.forgotPassword(emailCtrl.text.trim());
-      // ✅ نجح → روح لشاشة الـ OTP وبعّت الإيميل معاك
-      Navigator.push(context, MaterialPageRoute(
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        customSnack("Reset link sent"),
+      );      Navigator.push(context, MaterialPageRoute(
         builder: (_) => OtpVerifyScreen(email: emailCtrl.text.trim()),
       ));
     } on ApiError catch (e) {
-      // ❌ فشل → وريه الخطأ
+      if (!mounted) return; // ✅
+      setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         customSnack(e.message, isError: true),
       );
-    } finally {
+    } catch (e) {
+      if (!mounted) return;
       setState(() => _isLoading = false);
     }
   }
-// في الـ build:
-  @override
-  void initState() {
-    super.initState();
-  }
+
   @override
   Widget build(BuildContext context) {
+    final isDark = Provider.of<ThemeProvider>(context).isDark;
     return Scaffold(
-      backgroundColor: widget.isDark ? ColorManager.darkBg : ColorManager.lightBg,
+      backgroundColor: isDark ? ColorManager.darkBg : ColorManager.lightBg,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
@@ -61,14 +59,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> with Contro
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── Back button ───────────
                 BackButton(),
                 const SizedBox(height: 32),
-                // ── Title ─────────────────
                 Text(
                   'Forgot password',
                   style: TextStyle(
-                    color: widget.isDark ? ColorManager.darkTextPrimary : const Color(0xFF0F172A),
+                    color: isDark ? ColorManager.darkTextPrimary : const Color(0xFF0F172A),
                     fontSize: 26, fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -76,16 +72,15 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> with Contro
                 Text(
                   'Please enter your email to reset the password',
                   style: TextStyle(
-                    color: widget.isDark ? ColorManager.darkTextSecond : ColorManager.lightTextSecond,
+                    color: isDark ? ColorManager.darkTextSecond : ColorManager.lightTextSecond,
                     fontSize: 14, height: 1.6,
                   ),
                 ),
                 const SizedBox(height: 32),
-                // ── Email input ───────────
                 AuthInputField(
                   label: 'Email',
                   controller: emailCtrl,
-                  isDark: widget.isDark,
+                  isDark: isDark,
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -98,15 +93,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> with Contro
                   },
                 ),
                 const SizedBox(height: 28),
-                // ── Submit button ─────────
                 AuthButton(
                   label: 'Reset Password',
                   isLoading: _isLoading,
-                  onTap: () {
-                    if (formKey.currentState?.validate() == true) {
-                      _sendCode();
-                    }
-                  },
+                  onTap: _sendCode, // ✅ API حقيقي + validation
                 ),
               ],
             ),

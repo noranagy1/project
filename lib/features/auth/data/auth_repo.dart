@@ -128,7 +128,6 @@ class AuthRepo {
   Future<String?> getQrData() async {
     try {
       final response = await apiService.get('/api/qr/my-qr'); // غيري الـ endpoint على حسب الـ backend
-
       if (response is Map<String, dynamic>) {
         return response['qrData']?.toString(); // غيري الـ key على حسب رد السيرفر
       } else {
@@ -190,13 +189,10 @@ class AuthRepo {
         {'email': email, 'otp': code},
       );
       if (response is Map<String, dynamic>) {
-        // السيرفر بيرجع reset token مؤقت علشان نعمله authorize في الـ Step 3
         final resetToken = response['resetToken']?.toString()
-            ?? response['token']?.toString();
-        if (resetToken == null || resetToken.isEmpty) {
-          throw ApiError(message: 'Invalid or expired code');
-        }
-        return resetToken;
+            ?? response['token']?.toString()
+            ?? ''; // ✅ لو مفيش token نرجع string فاضي
+        return resetToken; // ✅ نرجع حتى لو فاضي
       }
       throw ApiError(message: 'Unexpected response from server');
     } on DioException catch (e) {
@@ -216,11 +212,10 @@ class AuthRepo {
   }) async {
     try {
       await apiService.post(
-        '/api/auth/reset-password',
+        '/api/auth/change-password',
         {
           'resetToken': resetToken,
           'newPassword': newPassword,
-          'confirmPassword': confirmPassword,
         },
       );
     } on DioException catch (e) {
@@ -229,11 +224,18 @@ class AuthRepo {
       throw ApiError(message: e.toString());
     }
   }
-  Future<void> controlDevice(String type, bool status) async {
-    await apiService.post('/api/control/toggle', {
-      'device': type,   // 'camera' or 'gate'
-      'status': status, // true = on, false = off
-    });
+  // ── Toggle Gate ───────────────────────
+  Future<void> toggleGate(String command) async {
+    try {
+      await apiService.post(
+        '/api/device/command',
+        {'command': command}, // 'open_gate' أو 'close_gate'
+      );
+    } on DioException catch (e) {
+      throw ApiExceptions.handleError(e);
+    } catch (e) {
+      throw ApiError(message: e.toString());
+    }
   }
   Future<Map<String, dynamic>> getGateStatus() async {
     return await apiService.get('/api/gate/status');
@@ -241,5 +243,4 @@ class AuthRepo {
   Future<dynamic> getVehicleReport() async {
     return await apiService.get('/api/vehicles/report');
   }
-
 }

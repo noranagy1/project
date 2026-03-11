@@ -78,12 +78,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                   ),
                   // More vert (right)
                   GestureDetector(
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (_) => MenuBottomSheet(),
-                      );
-                    },
+                    onTap: () {},
                     child: Container(
                       width: 36,
                       height: 36,

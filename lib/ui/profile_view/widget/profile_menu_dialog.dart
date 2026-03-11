@@ -216,6 +216,9 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
                     try {
                       await authRepo.logout();
                       if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        customSnack(context.l10n.logout_successfully),
+                      );
                       Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
@@ -234,7 +237,6 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
               ],
             ),
           ),
-
           // ── Bottom safe area ──────
           SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
         ],
@@ -302,7 +304,6 @@ class _MenuItem extends StatelessWidget {
                 ),
               ),
             ),
-
             // Trailing (chevron or badge)
             trailing ??
                 Icon(

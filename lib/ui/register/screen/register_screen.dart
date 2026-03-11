@@ -47,11 +47,12 @@ class _RegisterScreenState extends State<RegisterScreen> with ControllerMixin {
           if (!mounted) return;
           print('User: $user');
           if (user != null) {
-            ScaffoldMessenger.of(context).showSnackBar(customSnack(context.l10n.registration_success));
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => LoginScreen()),
             );
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(customSnack(context.l10n.registration_success));
           } else {
             ScaffoldMessenger.of(context).showSnackBar(customSnack(context.l10n.registration_failed));
           }

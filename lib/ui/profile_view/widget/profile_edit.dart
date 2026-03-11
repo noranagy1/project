@@ -2,6 +2,7 @@ import 'package:attendo/core/color_manager.dart';
 import 'package:attendo/core/extensions.dart';
 import 'package:attendo/core/reusable_components/customButton.dart';
 import 'package:attendo/core/reusable_components/customField.dart';
+import 'package:attendo/core/reusable_components/customSnackBar.dart';
 import 'package:attendo/core/utils/controller_mixin.dart';
 import 'package:attendo/features/auth/data/auth_repo.dart';
 import 'package:attendo/providers/theme_provider.dart';
@@ -60,17 +61,11 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> with Controll
         _emailCtrl.text.trim(),
         _carNumCtrl.text.trim(),
       );
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.profile_updated),
-            backgroundColor: ColorManager.emerald,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+          customSnack("Profile updated"),
+      );
         Navigator.pop(context);
-      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -10,16 +10,10 @@ import 'package:attendo/ui/login/screen/login_screen.dart';
 import 'package:attendo/ui/login/widget/password_reset.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../../../providers/theme_provider.dart';
-// ─────────────────────────────────────────
-//  SET NEW PASSWORD SCREEN
-//  Password + Confirm → Update → Success
-// ─────────────────────────────────────────
 class SetPasswordScreen extends StatefulWidget {
-  final bool isDark;
   final String resetToken;
-  const SetPasswordScreen({super.key, this.isDark = false, required this.resetToken});
+  const SetPasswordScreen({super.key, required this.resetToken});
   @override
   State<SetPasswordScreen> createState() => _SetPasswordScreenState();
 }
@@ -28,9 +22,15 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> with ControllerMi
   late final _confirmCtrl  = ctrl();
   final _repo = AuthRepo();
   bool _isLoading = false;
-  String? _errorMsg;
+
   Future<void> _resetPassword() async {
-    // validation بسيط قبل ما تبعت
+    // ── Validation ────────────────────
+    if (_passwordCtrl.text.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        customSnack(context.l10n.password_min, isError: true),
+      );
+      return;
+    }
     if (_passwordCtrl.text != _confirmCtrl.text) {
       ScaffoldMessenger.of(context).showSnackBar(
         customSnack("Passwords don't match", isError: true),
@@ -44,16 +44,23 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> with ControllerMi
         newPassword:     _passwordCtrl.text,
         confirmPassword: _confirmCtrl.text,
       );
-      Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (_) => const PasswordSuccessScreen()));
+      if (!mounted) return;// ✅ قبل أي Navigator أو SnackBar
       ScaffoldMessenger.of(context).showSnackBar(
-        customSnack('Password reset successfully!'),
+          customSnack("Password updated"),
       );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const PasswordSuccessScreen()),
+      );
+      // ✅ SnackBar بعد الـ navigate مش هيبان — شيلناه
     } on ApiError catch (e) {
+      if (!mounted) return; // ✅
+      setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         customSnack(e.message, isError: true),
       );
-    } finally {
+    } catch (e) {
+      if (!mounted) return;
       setState(() => _isLoading = false);
     }
   }
@@ -68,10 +75,8 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> with ControllerMi
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Back ─────────────────
               BackButton(),
               const SizedBox(height: 32),
-              // ── Title ─────────────────
               Text(
                 'Set a new password',
                 style: TextStyle(
@@ -95,12 +100,8 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> with ControllerMi
                 isDark: isDark,
                 isPassword: true,
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return context.l10n.shouldnt_be_empty;
-                  }
-                  if (value.length < 6) {
-                    return context.l10n.password_min;
-                  }
+                  if (value == null || value.isEmpty) return context.l10n.shouldnt_be_empty;
+                  if (value.length < 6) return context.l10n.password_min;
                   return null;
                 },
               ),
@@ -112,37 +113,16 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> with ControllerMi
                 isDark: isDark,
                 isPassword: true,
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return context.l10n.shouldnt_be_empty;
-                  }
-                  if (value != _passwordCtrl.text) {
-                    return 'Passwords do not match';
-                  }
+                  if (value == null || value.isEmpty) return context.l10n.shouldnt_be_empty;
+                  if (value != _passwordCtrl.text) return 'Passwords do not match';
                   return null;
                 },
               ),
-              // ── Error message ─────────
-              if (_errorMsg != null) ...[
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    const Icon(Icons.error_outline_rounded, color: ColorManager.red, size: 16),
-                    const SizedBox(width: 6),
-                    Text(
-                      _errorMsg!,
-                      style: const TextStyle(color: ColorManager.red, fontSize: 12.5),
-                    ),
-                  ],
-                ),
-              ],
               const SizedBox(height: 28),
-              // ── Submit ────────────────
               AuthButton(
                 label: 'Update Password',
                 isLoading: _isLoading,
-                onTap: () {
-                  _resetPassword();
-                },
+                onTap: _resetPassword, // ✅ API حقيقي
               ),
             ],
           ),

@@ -1,13 +1,16 @@
+// ─────────────────────────────────────────
+//  BOX WIDGETS  —  MainBox + SmallBox
+// ─────────────────────────────────────────
+// الإصلاح: MainBox gate toggle بيستدعي API حقيقي
+// open_gate لما يشغل، close_gate لما يوقف
+// ─────────────────────────────────────────
 import 'package:attendo/core/color_manager.dart';
 import 'package:attendo/core/extensions.dart';
+import 'package:attendo/core/network/api_error.dart';
+import 'package:attendo/core/reusable_components/customSnackBar.dart';
 import 'package:attendo/core/utils/app_icons.dart';
-import 'package:attendo/providers/theme_provider.dart';
+import 'package:attendo/features/auth/data/auth_repo.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-// ─────────────────────────────────────────
-//  MAIN BOX  —  Camera & Gate  (with toggle)
-// ─────────────────────────────────────────
 enum MainBoxType { camera, gate }
 class MainBox extends StatefulWidget {
   final MainBoxType type;
@@ -24,8 +27,10 @@ class MainBox extends StatefulWidget {
 }
 class _MainBoxState extends State<MainBox> with SingleTickerProviderStateMixin {
   bool _isOn = false;
+  bool _isLoading = false; // ✅ loading أثناء الـ API call
   late final AnimationController _scaleCtrl;
   late final Animation<double> _scaleAnim;
+  final _repo = AuthRepo(); // ✅
   @override
   void initState() {
     super.initState();
@@ -44,6 +49,29 @@ class _MainBoxState extends State<MainBox> with SingleTickerProviderStateMixin {
     super.dispose();
   }
   bool get _isCamera => widget.type == MainBoxType.camera;
+  // ── API call للـ gate فقط ──────────────
+  Future<void> _toggleGate(bool newValue) async {
+    if (_isLoading) return; // منع double tap
+    setState(() => _isLoading = true);
+    try {
+      final command = newValue ? 'open_gate' : 'close_gate';
+      await _repo.toggleGate(command); // ✅ API call
+      if (!mounted) return;
+      setState(() => _isOn = newValue); // ✅ نحدّث الـ state بعد نجاح الـ API
+    } on ApiError catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        customSnack(e.message, isError: true),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        customSnack('Something went wrong', isError: true),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
   // ── Colors per type & theme ────────────
   Color get _iconBg => widget.isDark
       ? (_isCamera ? ColorManager.darkCameraIconBg : ColorManager.darkGateIconBg)
@@ -116,11 +144,34 @@ class _MainBoxState extends State<MainBox> with SingleTickerProviderStateMixin {
               ),
               const SizedBox(height: 10),
               // ── Toggle ────────────────
-              _AppToggle(
+              // Camera: toggle عادي بدون API
+              // Gate: toggle بيستدعي API ✅
+              _isLoading
+                  ? SizedBox(
+                width: 42,
+                height: 23,
+                child: Center(
+                  child: SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: _toggleActiveColor,
+                    ),
+                  ),
+                ),
+              )
+                  : _AppToggle(
                 value: _isOn,
                 activeColor: _toggleActiveColor,
                 isDark: widget.isDark,
-                onChanged: (v) => setState(() => _isOn = v),
+                onChanged: (v) {
+                  if (_isCamera) {
+                    setState(() => _isOn = v); // Camera: local فقط
+                  } else {
+                    _toggleGate(v); // Gate: API call ✅
+                  }
+                },
               ),
             ],
           ),
@@ -130,7 +181,7 @@ class _MainBoxState extends State<MainBox> with SingleTickerProviderStateMixin {
   }
 }
 // ─────────────────────────────────────────
-//  SMALL BOX  —  Attendance, Report, etc.
+//  SMALL BOX
 // ─────────────────────────────────────────
 enum SmallBoxType { attendanceQr, report, complaint, gateStatus, vehicleReport }
 enum SmallBoxSize { large, small }
@@ -176,13 +227,12 @@ class _SmallBoxState extends State<SmallBox>
     _scaleCtrl.dispose();
     super.dispose();
   }
-  // ── Per-type config ────────────────────
   Color get _accentColor {
     switch (widget.type) {
-      case SmallBoxType.attendanceQr: return ColorManager.blue;
-      case SmallBoxType.report:     return ColorManager.sky;
-      case SmallBoxType.complaint:  return ColorManager.purple;
-      case SmallBoxType.gateStatus: return ColorManager.amber;
+      case SmallBoxType.attendanceQr:  return ColorManager.blue;
+      case SmallBoxType.report:        return ColorManager.sky;
+      case SmallBoxType.complaint:     return ColorManager.purple;
+      case SmallBoxType.gateStatus:    return ColorManager.amber;
       case SmallBoxType.vehicleReport: return ColorManager.amber;
     }
   }
@@ -200,24 +250,22 @@ class _SmallBoxState extends State<SmallBox>
         return widget.isDark ? ColorManager.darkAmberAccent  : ColorManager.lightAmberAccent;
     }
   }
-  Color get _borderColor {
-    return _accentColor.withOpacity(widget.isDark ? 0.22 : 0.18);
-  }
+  Color get _borderColor => _accentColor.withOpacity(widget.isDark ? 0.22 : 0.18);
   String get _title {
     switch (widget.type) {
-      case SmallBoxType.attendanceQr: return 'Attendance\nQr Code';
-      case SmallBoxType.report:     return context.l10n.attendance_report;
-      case SmallBoxType.complaint:  return context.l10n.submit_complaint;
-      case SmallBoxType.gateStatus: return 'Gate and camera \n Status';
+      case SmallBoxType.attendanceQr:  return 'Attendance\nQr Code';
+      case SmallBoxType.report:        return context.l10n.attendance_report;
+      case SmallBoxType.complaint:     return context.l10n.submit_complaint;
+      case SmallBoxType.gateStatus:    return 'Gate and camera\nStatus';
       case SmallBoxType.vehicleReport: return context.l10n.vehicle_report;
     }
   }
   IconData get _icon {
     switch (widget.type) {
-      case SmallBoxType.attendanceQr: return AppIcons.attendance;
-      case SmallBoxType.report:     return AppIcons.report;
-      case SmallBoxType.complaint:  return AppIcons.complaint;
-      case SmallBoxType.gateStatus: return AppIcons.gateStatus;
+      case SmallBoxType.attendanceQr:  return AppIcons.attendance;
+      case SmallBoxType.report:        return AppIcons.report;
+      case SmallBoxType.complaint:     return AppIcons.complaint;
+      case SmallBoxType.gateStatus:    return AppIcons.gateStatus;
       case SmallBoxType.vehicleReport: return AppIcons.vehicleReport;
     }
   }
@@ -237,7 +285,7 @@ class _SmallBoxState extends State<SmallBox>
             decoration: BoxDecoration(
               color: widget.isDark
                   ? ColorManager.darkProfileBg
-                  : Colors.white,
+                  : ColorManager.lightCard,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: _borderColor),
               boxShadow: widget.isDark
@@ -250,36 +298,36 @@ class _SmallBoxState extends State<SmallBox>
                 ),
               ],
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // ── Icon ─────────────────
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: _iconBg,
-                    borderRadius: BorderRadius.circular(10),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: _iconBg,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(_icon, color: _accentColor, size: 25),
                   ),
-                  child: Icon(_icon, color: _accentColor, size: 25),
-                ),
-                const SizedBox(height: 10),
-                // ── Title ─────────────────
-                Text(
-                  _title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: widget.isDark
-                        ? ColorManager.darkTextPrimary
-                        : ColorManager.lightTextPrimary,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    height: 1.2,
+                  const SizedBox(height: 10),
+                  Text(
+                    _title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: widget.isDark
+                          ? ColorManager.darkTextPrimary
+                          : ColorManager.lightTextPrimary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      height: 1.2,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -288,7 +336,7 @@ class _SmallBoxState extends State<SmallBox>
   }
 }
 // ─────────────────────────────────────────
-//  TOGGLE  —  Light & Dark
+//  TOGGLE
 // ─────────────────────────────────────────
 class _AppToggle extends StatelessWidget {
   final bool value;

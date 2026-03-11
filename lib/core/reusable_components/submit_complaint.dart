@@ -2,6 +2,7 @@ import 'package:attendo/core/color_manager.dart';
 import 'package:attendo/core/extensions.dart';
 import 'package:attendo/core/reusable_components/customButton.dart';
 import 'package:attendo/core/reusable_components/customField.dart';
+import 'package:attendo/core/reusable_components/customSnackBar.dart';
 import 'package:attendo/core/utils/controller_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -73,17 +74,11 @@ class _ComplaintScreenState extends State<ComplaintScreen> with ControllerMixin 
       //   date:    _selectedDate,
       // );
       await Future.delayed(const Duration(milliseconds: 800));
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Complaint submitted successfully'),
-            backgroundColor: ColorManager.emerald,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        customSnack("Complaint submitted"),
+      );
         Navigator.pop(context);
-      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

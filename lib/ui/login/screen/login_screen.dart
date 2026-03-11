@@ -29,20 +29,15 @@ class _LoginScreenState extends State<LoginScreen> with ControllerMixin {
   @override
   void initState() {
     super.initState();
-    if (widget.showLogoutMessage) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            customSnack(context.l10n.logout_successfully));
-      });
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+    });
   }
   bool isLoading = false;
   AuthRepo authRepo = AuthRepo();
   String selectedTab = 'login';
   Future<void> login() async {
-    if (formKey.currentState?.validate() != true) {
-      return;
-    }
+    if (formKey.currentState?.validate() != true) return;
     setState(() => isLoading = true);
     try {
       final user = await authRepo.login(
@@ -51,26 +46,27 @@ class _LoginScreenState extends State<LoginScreen> with ControllerMixin {
       );
       if (!mounted) return;
       if (user != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            customSnack(context.l10n.login_success));
+        // ✅ Navigator الأول بدون SnackBar
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => SecurityScreen()),
+          MaterialPageRoute(builder: (context) => SecurityScreen()
+          ),
         );
+        ScaffoldMessenger.of(context).showSnackBar(customSnack(context.l10n.login_success));
       } else {
         setState(() => isLoading = false);
         ScaffoldMessenger.of(context)
-            .showSnackBar(customSnack(context.l10n.login_failed));
+            .showSnackBar(customSnack(context.l10n.login_failed, isError: true));
       }
     } catch (e) {
       if (!mounted) return;
       setState(() => isLoading = false);
-      final errorMsg =
-      e is ApiError ? e.message : context.l10n.unknown_error;
-      ScaffoldMessenger.of(context).showSnackBar(customSnack(errorMsg));
+      final errorMsg = e is ApiError ? e.message : context.l10n.unknown_error;
+      ScaffoldMessenger.of(context).showSnackBar(
+        customSnack(errorMsg, isError: true),
+      );
     }
-  }
-  @override
+  }  @override
   Widget build(BuildContext context) {
     final isDark = Provider.of<ThemeProvider>(context).isDark;
     return Scaffold(

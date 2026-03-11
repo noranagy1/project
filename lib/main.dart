@@ -1,7 +1,7 @@
 import 'package:attendo/providers/locale_provider.dart';
 import 'package:attendo/providers/theme_provider.dart';
 import 'package:attendo/l10n/app_localizations.dart';
-import 'package:attendo/ui/employee/screen/employee_screen.dart';
+import 'package:attendo/ui/login/screen/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       locale: localeProvider.locale,
       supportedLocales: [
-        const Locale('en'),
+        Locale('en'),
         Locale('ar'),
       ],
       localizationsDelegates: [
@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
       ],
       themeMode: themeProvider.isDark ? ThemeMode.dark : ThemeMode.light,
       home: Consumer<ThemeProvider>(
-        builder: (context, themeProvider, _) => EmployeeScreen(),
+        builder: (context, themeProvider, _) => LoginScreen(),
       ),
     );
   }
