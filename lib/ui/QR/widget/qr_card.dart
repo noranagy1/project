@@ -1,27 +1,29 @@
+import 'dart:convert';
 import 'package:attendo/core/color_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:qr_flutter/qr_flutter.dart';
-// ─────────────────────────────────────────
-//  QR CARD
-//  - بيعرض الـ QR الخاص بالمستخدم
-//  - الـ QR بيتجدد كل يوم عند منتص الليل
-//  - الـ qrData بيجي من الـ backend
-// ─────────────────────────────────────────
-//
-//  Package مطلوب في pubspec.yaml:
-//    qr_flutter: ^4.1.0
+import 'dart:typed_data';
 class QrCard extends StatelessWidget {
   final bool isDark;
-  // مثال: قيمة مشفرة unique لكل مستخدم + تاريخ اليوم
-  final String qrData;
+  final String qrData; // base64 image من السيرفر
   const QrCard({
     super.key,
     required this.isDark,
-    this.qrData = 'USER_ID_20260306', // placeholder
+    this.qrData = '',
   });
-
+  // ── تحويل base64 لـ bytes ──────────────
+  Uint8List? get _imageBytes {
+    try {
+      final base64Str = qrData.contains(',')
+          ? qrData.split(',').last // شيل الـ "data:image/png;base64," prefix
+          : qrData;
+      return base64Decode(base64Str);
+    } catch (_) {
+      return null;
+    }
+  }
   @override
   Widget build(BuildContext context) {
+    final bytes = _imageBytes;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -66,24 +68,23 @@ class QrCard extends StatelessWidget {
                     ],
                   ),
                   padding: const EdgeInsets.all(14),
-                  child: QrImageView(
-                    data: qrData,
-                    version: QrVersions.auto,
-                    size: 200,
-                    backgroundColor: Colors.white,
-                    eyeStyle: const QrEyeStyle(
-                      eyeShape: QrEyeShape.square,
-                      color: Color(0xFF111827),
-                    ),
-                    dataModuleStyle: const QrDataModuleStyle(
-                      dataModuleShape: QrDataModuleShape.square,
-                      color: Color(0xFF111827),
+                  child: bytes != null
+                      ? Image.memory( // ✅ عرض الصورة الجاهزة من السيرفر
+                    bytes,
+                    width: 200,
+                    height: 200,
+                    fit: BoxFit.contain,
+                  )
+                      : const SizedBox( // لو فشل التحويل
+                    width: 200,
+                    height: 200,
+                    child: Center(
+                      child: Icon(Icons.qr_code_2_rounded,
+                          size: 80, color: Colors.grey),
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 16),
-
                 // ── Refresh notice ────────
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -105,9 +106,9 @@ class QrCard extends StatelessWidget {
                         fontSize: 12,
                       ),
                     ),
-                    Text(
+                    const Text(
                       'midnight',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: ColorManager.blue,
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
@@ -122,15 +123,12 @@ class QrCard extends StatelessWidget {
       ),
     );
   }
-
   // ── Corner decorations ─────────────────
   List<Widget> _buildCorners() {
     const size = 28.0;
     const thickness = 2.0;
     final color = ColorManager.blue;
-
     return [
-      // Top-left
       Positioned(
         top: 0, left: 0,
         child: Container(
@@ -140,13 +138,10 @@ class QrCard extends StatelessWidget {
               top:  BorderSide(color: color, width: thickness),
               left: BorderSide(color: color, width: thickness),
             ),
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(24),
-            ),
+            borderRadius: const BorderRadius.only(topLeft: Radius.circular(24)),
           ),
         ),
       ),
-      // Top-right
       Positioned(
         top: 0, right: 0,
         child: Container(
@@ -156,13 +151,10 @@ class QrCard extends StatelessWidget {
               top:   BorderSide(color: color, width: thickness),
               right: BorderSide(color: color, width: thickness),
             ),
-            borderRadius: const BorderRadius.only(
-              topRight: Radius.circular(24),
-            ),
+            borderRadius: const BorderRadius.only(topRight: Radius.circular(24)),
           ),
         ),
       ),
-      // Bottom-left
       Positioned(
         bottom: 0, left: 0,
         child: Container(
@@ -172,13 +164,10 @@ class QrCard extends StatelessWidget {
               bottom: BorderSide(color: color, width: thickness),
               left:   BorderSide(color: color, width: thickness),
             ),
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(24),
-            ),
+            borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(24)),
           ),
         ),
       ),
-      // Bottom-right
       Positioned(
         bottom: 0, right: 0,
         child: Container(
@@ -188,9 +177,7 @@ class QrCard extends StatelessWidget {
               bottom: BorderSide(color: color, width: thickness),
               right:  BorderSide(color: color, width: thickness),
             ),
-            borderRadius: const BorderRadius.only(
-              bottomRight: Radius.circular(24),
-            ),
+            borderRadius: const BorderRadius.only(bottomRight: Radius.circular(24)),
           ),
         ),
       ),

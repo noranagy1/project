@@ -127,9 +127,9 @@ class AuthRepo {
   ///QR
   Future<String?> getQrData() async {
     try {
-      final response = await apiService.get('/api/qr/my-qr'); // غيري الـ endpoint على حسب الـ backend
+      final response = await apiService.get('/api/qr/my-qr');
       if (response is Map<String, dynamic>) {
-        return response['qrData']?.toString(); // غيري الـ key على حسب رد السيرفر
+        return response['qrImage']?.toString(); // ✅ بدل qrData
       } else {
         throw ApiError(message: 'Unexpected response');
       }
@@ -138,8 +138,7 @@ class AuthRepo {
     } catch (e) {
       throw ApiError(message: e.toString());
     }
-  }
-  /// Attendance
+  }/// Attendance
   Future<MonthlyReport> getMonthlyReport() async {
     try {
       final response = await apiService.get('/api/attendance/report');
