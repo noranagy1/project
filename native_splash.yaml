@@ -1,0 +1,9 @@
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: assets/images/statusService.png
+  fullscreen: true
+
+  android_12:
+    color: "#FFFFFF"
+    image: assets/images/statusService.png
+    branding: assets/images/branding (1).png
