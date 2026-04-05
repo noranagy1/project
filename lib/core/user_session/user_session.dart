@@ -8,15 +8,15 @@ class UserSession {
   static String email = '';
   static String employeeId = '';
 
-
   static Future<void> save() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('token', token);
     await prefs.setString('name', name);
     await prefs.setString('role', role);
     await prefs.setString('email', email);
-  }
+    await prefs.setString('employeeId', employeeId);
 
+  }
 
   static Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
@@ -24,8 +24,8 @@ class UserSession {
     name = prefs.getString('name') ?? '';
     role = prefs.getString('role') ?? '';
     email = prefs.getString('email') ?? '';
+    employeeId = prefs.getString('employeeId') ?? '';
   }
-
 
   static Future<void> clear() async {
     final prefs = await SharedPreferences.getInstance();
@@ -34,6 +34,7 @@ class UserSession {
     name = '';
     role = '';
     email = '';
+    employeeId = '';
   }
 
   static ValueNotifier<bool> gateStatus = ValueNotifier(false);

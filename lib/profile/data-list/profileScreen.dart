@@ -42,7 +42,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 showDialog(
                   context: context,
                   barrierDismissible: false,
-                  builder: (_) => const Center(child: CircularProgressIndicator()),
+                  builder: (_) =>
+                  const Center(child: CircularProgressIndicator()),
                 );
               } else if (state is ProfileUpdateSuccessState) {
                 if (_isDialogShowing) {
@@ -69,21 +70,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
               }
             },
             child: CustomScaffold(
-              icons: Icon(Icons.arrow_forward_ios, color: AppColor.royalBlue, size: 30),
+              icons: Icon(Icons.arrow_forward_ios,
+                  color: AppColor.royalBlue, size: 30),
               onIconPressed: () => Navigator.pop(context),
               body: BlocBuilder<ProfileCubit, ProfileState>(
                 builder: (context, state) {
                   if (state is ProfileLoadingState) {
                     return const Center(child: CircularProgressIndicator());
                   }
+
                   final model = state is ProfileSuccessState
                       ? state.model
                       : state is ProfileUpdateSuccessState
                       ? state.model
                       : null;
+
                   if (model != null && nameController.text.isEmpty) {
                     nameController.text = model.name;
                     emailController.text = model.email;
+                  }
+
+
+                  if (model != null) {
+                    print('====== Profile Data ======');
+                    print('ID: ${model.id}');
+                    print('Name: ${model.name}');
+                    print('Email: ${model.email}');
+                    print('Role: ${model.role}');
+                    print('Employee ID: ${UserSession.employeeId}');
+                    print('==========================');
                   }
 
                   return Padding(
@@ -98,63 +113,82 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           indent: 20,
                           endIndent: 20,
                         ),
-                        SizedBox(height: 12),
+                        const SizedBox(height: 12),
                         if (model != null)
                           Container(
                             width: double.infinity,
-                            padding: EdgeInsets.all(16),
-                            margin: EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.all(16),
+                            margin: const EdgeInsets.only(bottom: 12),
                             decoration: BoxDecoration(
                               color: AppColor.primary,
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.badge_outlined, color: AppColor.royalBlue),
-                                SizedBox(width: 8),
+                                Icon(Icons.badge_outlined,
+                                    color: AppColor.royalBlue),
+                                const SizedBox(width: 8),
                                 Text(
                                   '${AppLocalizations.of(context)!.Employee_ID} ${UserSession.employeeId}',
-                                  style: TextStyle(color: AppColor.royalBlue),
+                                  style:
+                                  TextStyle(color: AppColor.royalBlue),
                                 ),
                               ],
                             ),
                           ),
-
-                        // ── Role ──
                         if (model != null)
                           Container(
                             width: double.infinity,
-                            padding: EdgeInsets.all(16),
-                            margin: EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.all(16),
+                            margin: const EdgeInsets.only(bottom: 12),
                             decoration: BoxDecoration(
                               color: AppColor.primary,
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.work_outline, color: AppColor.royalBlue),
-                                SizedBox(width: 8),
+                                Icon(Icons.work_outline,
+                                    color: AppColor.royalBlue),
+                                const SizedBox(width: 8),
                                 Text(
                                   'Role: ${model.role}',
+                                  style:
+                                  TextStyle(color: AppColor.royalBlue),
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (model != null)
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(16),
+                            margin: const EdgeInsets.only(bottom: 12),
+                            decoration: BoxDecoration(
+                              color: AppColor.primary,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.numbers, color: AppColor.royalBlue),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Employee Number: ${model.employeeNumber}',
                                   style: TextStyle(color: AppColor.royalBlue),
                                 ),
                               ],
                             ),
                           ),
-
                         AppFormField(
                           hintText: AppLocalizations.of(context)!.name,
                           controller: nameController,
                         ),
-                        SizedBox(height: 12),
-
+                        const SizedBox(height: 12),
                         AppFormField(
                           hintText: AppLocalizations.of(context)!.email,
                           controller: emailController,
                           keyboardType: TextInputType.emailAddress,
                         ),
-                        SizedBox(height: 20),
-
+                        const SizedBox(height: 20),
                         BlocBuilder<ProfileCubit, ProfileState>(
                           builder: (context, state) {
                             return ElevatedButton(
@@ -162,23 +196,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ? null
                                   : () {
                                 if (nameController.text.trim().isEmpty ||
-                                    emailController.text.trim().isEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    emailController.text
+                                        .trim()
+                                        .isEmpty) {
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(
                                     SnackBar(
-                                      content: Text(AppLocalizations.of(context)!.please_enter_email),
+                                      content: Text(
+                                          AppLocalizations.of(context)!
+                                              .please_enter_email),
                                       backgroundColor: Colors.red,
                                     ),
                                   );
                                   return;
                                 }
-                                context.read<ProfileCubit>().updateProfile(
-                                  name: nameController.text.trim(),
-                                  email: emailController.text.trim(),
+                                context
+                                    .read<ProfileCubit>()
+                                    .updateProfile(
+                                  name:
+                                  nameController.text.trim(),
+                                  email:
+                                  emailController.text.trim(),
                                 );
                               },
                               child: Text(
                                 AppLocalizations.of(context)!.save_change,
-                                style: Theme.of(context).textTheme.bodySmall,
+                                style:
+                                Theme.of(context).textTheme.bodySmall,
                               ),
                             );
                           },

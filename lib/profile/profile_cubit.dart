@@ -14,7 +14,13 @@ class ProfileCubit extends Cubit<ProfileState> {
     final result = await _repository.getProfile();
     result.fold(
           (failure) => emit(ProfileErrorState(message: failure.message)),
-          (model) => emit(ProfileSuccessState(model: model)),
+          (model) {
+
+        UserSession.employeeId = model.id;
+        UserSession.role = model.role;
+        UserSession.save();
+        emit(ProfileSuccessState(model: model));
+      },
     );
   }
 
@@ -27,9 +33,11 @@ class ProfileCubit extends Cubit<ProfileState> {
     result.fold(
           (failure) => emit(ProfileErrorState(message: failure.message)),
           (model) {
-
         UserSession.name = model.name;
         UserSession.email = model.email;
+        UserSession.employeeId = model.id;
+        UserSession.role = model.role;
+
         UserSession.save();
         emit(ProfileUpdateSuccessState(model: model));
       },
