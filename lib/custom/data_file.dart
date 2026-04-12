@@ -5,6 +5,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:new_project/core/user_session/user_session.dart';
 import 'package:new_project/design/AppColor.dart';
 import 'package:new_project/design/AppImage.dart';
+import 'package:new_project/providers/ThemeProvider.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../attendance_report/Att-report_screen.dart';
@@ -103,11 +105,9 @@ class _DataFileState extends State<DataFile> {
                           maxLines: 2,
                           style: Theme.of(context).textTheme.titleSmall
                               ?.copyWith(
-                            color: isDarkMode(context)
-                                ? AppColor.white
-                                : AppColor.gray,
-                          ),
+                            color: Provider.of<ThemeProvider>(context).isDarkMode ? AppColor.softGray : AppColor.gray,
                         ),
+                        )
                       ],
                     ),
                   ),

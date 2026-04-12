@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
 import 'package:new_project/Ui/statusService/gateService/device_command.dart';
 
 class DeviceService {
@@ -14,7 +13,7 @@ class DeviceService {
     'Authorization': 'Bearer $token',
   };
 
-
+  // ✅ Gate و Camera بيستخدموا نفس الـ endpoint
   Future<DeviceCommand> sendCommand(String command) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/device/command'),
@@ -26,6 +25,21 @@ class DeviceService {
       return DeviceCommand.fromJson(data['data']);
     } else {
       throw Exception(data['message'] ?? 'Failed to send command');
+    }
+  }
+
+  // ✅ نفس الـ endpoint للكاميرا
+  Future<DeviceCommand> sendCameraCommand(String command) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/device/command'), // ✅ نفس الـ endpoint
+      headers: _headers,
+      body: jsonEncode({'command': command}),
+    );
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 200) {
+      return DeviceCommand.fromJson(data['data']);
+    } else {
+      throw Exception(data['message'] ?? 'Failed to send camera command');
     }
   }
 
@@ -42,24 +56,10 @@ class DeviceService {
     }
   }
 
-
-  Future<DeviceCommand> sendCameraCommand(String command) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/api/device/command'),
-      headers: _headers,
-      body: jsonEncode({'command': command}),
-    );
-    final data = jsonDecode(response.body);
-    if (response.statusCode == 200) {
-      return DeviceCommand.fromJson(data['data']);
-    } else {
-      throw Exception(data['message'] ?? 'Failed to send camera command');
-    }
-  }
-
+  // ✅ نفس الـ endpoint للتشيك
   Future<bool> isCameraCommandDone() async {
     final response = await http.get(
-      Uri.parse('$baseUrl/api/device/commands/pending'),
+      Uri.parse('$baseUrl/api/device/commands/pending'), // ✅ نفس الـ endpoint
       headers: _headers,
     );
     if (response.statusCode == 200) {

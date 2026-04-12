@@ -7,6 +7,9 @@ class UserSession {
   static String role = '';
   static String email = '';
   static String employeeId = '';
+  static String password = '';
+  static String employeeNumber = '';
+
 
   static Future<void> save() async {
     final prefs = await SharedPreferences.getInstance();
@@ -15,6 +18,8 @@ class UserSession {
     await prefs.setString('role', role);
     await prefs.setString('email', email);
     await prefs.setString('employeeId', employeeId);
+    await prefs.setString('password', password);
+    await prefs.setString('employeeNumber', employeeNumber);
 
   }
 
@@ -25,6 +30,8 @@ class UserSession {
     role = prefs.getString('role') ?? '';
     email = prefs.getString('email') ?? '';
     employeeId = prefs.getString('employeeId') ?? '';
+    password = prefs.getString('password') ?? '';
+    employeeNumber = prefs.getString('employeeNumber') ?? '';
   }
 
   static Future<void> clear() async {
@@ -35,6 +42,8 @@ class UserSession {
     role = '';
     email = '';
     employeeId = '';
+    password = '';
+    employeeNumber = '';
   }
 
   static ValueNotifier<bool> gateStatus = ValueNotifier(false);
