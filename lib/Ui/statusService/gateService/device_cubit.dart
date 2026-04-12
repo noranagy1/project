@@ -1,45 +1,50 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:new_project/Ui/statusService/gateService/device_service.dart';
 import 'device_state.dart';
 
 class DeviceCubit extends Cubit<DeviceState> {
   final DeviceService _deviceService;
-  Timer? _pollingTimer;
+  Timer? _gatePollingTimer;
+  Timer? _cameraPollingTimer;
 
   DeviceCubit(this._deviceService) : super(DeviceInitial());
 
-
   Future<void> sendCommand(String command) async {
-    emit(DeviceLoading());
+    emit(DeviceGateLoading());
     try {
       final sentCommand = await _deviceService.sendCommand(command);
-      emit(DeviceCommandSent(sentCommand));
-      _startPolling(isCamera: false);
+      emit(DeviceGateCommandSent(sentCommand));
+      _startGatePolling();
     } catch (e) {
-      emit(DeviceError(e.toString(), type: 'statusService'));
+      emit(DeviceError(e.toString(), type: 'gate'));
     }
   }
 
-
-
   Future<void> sendCameraCommand(String command) async {
-    emit(DeviceLoading());
+    emit(DeviceCameraLoading());
     try {
       final sentCommand = await _deviceService.sendCameraCommand(command);
-      emit(DeviceCommandSent(sentCommand));
-      _startPolling(isCamera: true);
+      emit(DeviceCameraCommandSent(sentCommand));
+      _startCameraPolling();
     } catch (e) {
       emit(DeviceError(e.toString(), type: 'camera'));
     }
   }
 
-  void _startPolling({required bool isCamera}) {
-    _pollingTimer?.cancel();
-    _pollingTimer = Timer.periodic(
+  void _startGatePolling() {
+    _gatePollingTimer?.cancel();
+    _gatePollingTimer = Timer.periodic(
       const Duration(seconds: 2),
-          (_) => isCamera ? _checkCameraCommandStatus() : _checkCommandStatus(),
+          (_) => _checkCommandStatus(),
+    );
+  }
+
+  void _startCameraPolling() {
+    _cameraPollingTimer?.cancel();
+    _cameraPollingTimer = Timer.periodic(
+      const Duration(seconds: 2),
+          (_) => _checkCameraCommandStatus(),
     );
   }
 
@@ -47,12 +52,12 @@ class DeviceCubit extends Cubit<DeviceState> {
     try {
       final isDone = await _deviceService.isCommandDone();
       if (isDone) {
-        _pollingTimer?.cancel();
-        emit(DeviceCommandDone(type: 'statusService'));
+        _gatePollingTimer?.cancel();
+        emit(DeviceCommandDone(type: 'gate'));
       }
     } catch (e) {
-      _pollingTimer?.cancel();
-      emit(DeviceError(e.toString(), type: 'statusService'));
+      _gatePollingTimer?.cancel();
+      emit(DeviceError(e.toString(), type: 'gate'));
     }
   }
 
@@ -60,23 +65,25 @@ class DeviceCubit extends Cubit<DeviceState> {
     try {
       final isDone = await _deviceService.isCameraCommandDone();
       if (isDone) {
-        _pollingTimer?.cancel();
+        _cameraPollingTimer?.cancel();
         emit(DeviceCommandDone(type: 'camera'));
       }
     } catch (e) {
-      _pollingTimer?.cancel();
+      _cameraPollingTimer?.cancel();
       emit(DeviceError(e.toString(), type: 'camera'));
     }
   }
 
   void reset() {
-    _pollingTimer?.cancel();
+    _gatePollingTimer?.cancel();
+    _cameraPollingTimer?.cancel();
     emit(DeviceInitial());
   }
 
   @override
   Future<void> close() {
-    _pollingTimer?.cancel();
+    _gatePollingTimer?.cancel();
+    _cameraPollingTimer?.cancel();
     return super.close();
   }
 }
